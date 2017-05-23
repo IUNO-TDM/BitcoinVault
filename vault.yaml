@@ -1,0 +1,230 @@
+swagger: '2.0'
+info:
+  title: Manage Bitcoins for users.
+  version: 1.0.0
+host: 'localhost:8080'
+schemes:
+  - http
+basePath: /v1
+consumes:
+  - application/json
+produces:
+  - application/json
+  - text/plain
+paths:
+  /wallets:
+    post:
+      summary: Creates a new wallet for a user
+      operationId: addWallet
+      parameters:
+        - name: userId
+          description: the users ID the wallet is created for
+          in: query
+          required: true
+          type: string
+      responses:
+        '201':
+          description: wallet created
+          schema:
+            type: string
+            description: the wallet ID
+    get:
+      summary: returns wallet IDs for userID
+      operationId: getWalletId
+      parameters:
+        - name: userId
+          description: the users ID the wallet is created for
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: wallet IDs for UserID
+          schema:
+            type: array
+            items:
+              type: string
+  '/wallets/{walletId}':
+    delete:
+      summary: delete a user wallet
+      operationId: deleteWallet
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/credit':
+    get:
+      summary: get current credit for wallet
+      operationId: getCredit
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/transactions':
+    get:
+      summary: get txs with utxo for wallet
+      operationId: getTransactions
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Transaction'
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/payoutaddress':
+    put:
+      summary: set PayoutAddress and iniate Payout
+      operationId: payoutCredit
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+        - name: payoutaddress
+          description: the payoutAddress
+          in: query
+          required: true
+          type: string
+        - name: authToken
+          description: the authToken to payout this
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: payout succeeded
+        '403':
+          description: wrong authCode or not authorized
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/newaddress':
+    get:
+      summary: get new receive address
+      operationId: getNewAddress
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        '200':
+          description: here is a new reveiving address
+          schema:
+            type: string
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/lastaddress':
+    get:
+      summary: get last receive address
+      operationId: getLastAddress
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        '200':
+          description: here is the last reveiving address
+          schema:
+            type: string
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/publicseed':
+    get:
+      summary: get the Public Seed of the keychain
+      operationId: getPublicSeed
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        '200':
+          description: here is the public seed
+          schema:
+            type: string
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Transaction:
+    description: incoming or outgoing tx fullfilling an invoice
+    type: object
+    properties:
+      txid:
+        type: string
+        description: the txid
+      state:
+        type: string
+        description: confidence state
+        default: unknown
+        enum:
+          - building
+          - pending
+          - dead
+          - unknown
+          - conflict
+      depthInBlocks:
+        type: integer
+        format: int32
+        description: depth of a building transaction in blocks
+      amount:
+        type: integer
+        format: int32
+        description: The amount of satoshies received by this tx
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        description: meaningful error message
