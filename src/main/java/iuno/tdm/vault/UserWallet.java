@@ -102,6 +102,8 @@ public class UserWallet {
         SendRequest sendRequest = SendRequest.emptyWallet(payoutAddress);
         try {
             wallet.completeTx(sendRequest);
+            wallet.commitTx(sendRequest.tx);
+
         } catch (InsufficientMoneyException e) {
             e.printStackTrace();
         }

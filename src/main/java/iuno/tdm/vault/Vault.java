@@ -11,6 +11,7 @@ import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.store.SPVBlockStore;
 import org.bitcoinj.utils.BriefLogFormatter;
+import org.bitcoinj.wallet.SendRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,6 +127,7 @@ public class Vault {
         if(!userWallets.containsKey(walletId)){
             throw new NullPointerException("no wallet with id " + walletId.toString());
         }
+        //TODO At this point the auth token for this action should be checked
         userWallets.get(walletId).payoutCredit(Address.fromBase58(context.getParams(),payoutAddress));
     }
 
