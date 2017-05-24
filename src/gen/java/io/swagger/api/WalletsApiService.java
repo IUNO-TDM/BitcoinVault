@@ -17,7 +17,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T11:54:18.884Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T15:06:19.418Z")
 public abstract class WalletsApiService {
     public abstract Response addWallet( @NotNull String userId,SecurityContext securityContext) throws NotFoundException;
     public abstract Response deleteWallet(UUID walletId,SecurityContext securityContext) throws NotFoundException;
@@ -27,5 +27,5 @@ public abstract class WalletsApiService {
     public abstract Response getPublicSeed(UUID walletId,SecurityContext securityContext) throws NotFoundException;
     public abstract Response getTransactions(UUID walletId,SecurityContext securityContext) throws NotFoundException;
     public abstract Response getWalletId( @NotNull String userId,SecurityContext securityContext) throws NotFoundException;
-    public abstract Response payoutCredit(UUID walletId,String body, @NotNull String authToken,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response payoutCredit(UUID walletId, @NotNull String payoutaddress, @NotNull String authToken,SecurityContext securityContext) throws NotFoundException;
 }

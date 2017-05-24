@@ -150,6 +150,11 @@
             <artifactId>migbase64</artifactId>
             <version>2.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.7.2</version>
+        </dependency>
 
 
         <!-- Bean Validation API support -->

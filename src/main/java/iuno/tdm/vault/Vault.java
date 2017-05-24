@@ -3,6 +3,7 @@ package iuno.tdm.vault;
 import ch.qos.logback.classic.Level;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import io.swagger.model.Transaction;
 import org.bitcoinj.core.*;
 import org.bitcoinj.core.listeners.DownloadProgressTracker;
 import org.bitcoinj.net.discovery.DnsDiscovery;
@@ -38,6 +39,7 @@ public class Vault {
     private HashMap<UUID, UserWallet> userWallets = new HashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(Vault.class);
+    private VaultPersistence vaultPersistence;
 
     private Vault(){
         BriefLogFormatter.initWithSilentBitcoinJ();
@@ -48,6 +50,14 @@ public class Vault {
         final NetworkParameters params = TestNet3Params.get();
         context = new Context(params);
         Context.propagate(context);
+        try {
+            vaultPersistence = VaultPersistence.getInstance();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+
     }
 
     public static Vault getInstance(){
@@ -63,6 +73,7 @@ public class Vault {
         blockChain.addWallet(wallet.getWallet());
         peerGroup.addWallet(wallet.getWallet());
         userWallets.put(wallet.getId(),wallet);
+        vaultPersistence.addWallet(wallet);
         return wallet.getId();
     }
 
@@ -71,6 +82,11 @@ public class Vault {
             throw new NullPointerException("Cannot delete wallet with id "
                     + walletId.toString() + ", it doesn't exists");
         }
+        UserWallet userWallet = userWallets.get(walletId);
+        vaultPersistence.deleteWallet(userWallet);
+        blockChain.removeWallet(userWallet.getWallet());
+        peerGroup.removeWallet(userWallet.getWallet());
+        userWallet.deleteWallet();
         userWallets.remove(walletId);
     }
 
@@ -113,6 +129,56 @@ public class Vault {
         userWallets.get(walletId).payoutCredit(Address.fromBase58(context.getParams(),payoutAddress));
     }
 
+    public String getPublicSeed(UUID walletId){
+        if(!userWallets.containsKey(walletId)){
+            throw new NullPointerException("no wallet with id " + walletId.toString());
+        }
+        return userWallets.get(walletId).getPublicSeed();
+    }
+
+    public io.swagger.model.Transaction[] getTransactions(UUID walletId){
+        if(!userWallets.containsKey(walletId)){
+            throw new NullPointerException("no wallet with id " + walletId.toString());
+        }
+        TransactionOutput[] transactionOutputs = userWallets.get(walletId).getTransactionOutputs();
+        io.swagger.model.Transaction[] swaggerTxs = new io.swagger.model.Transaction[transactionOutputs.length];
+        for(int i=0; i< swaggerTxs.length;i++){
+            TransactionOutput txOut = transactionOutputs[i];
+            io.swagger.model.Transaction sTx = new io.swagger.model.Transaction();
+            sTx.setAmount((int)txOut.getValue().value);
+            sTx.setTxid(txOut.getParentTransactionHash().toString());
+
+            sTx.setState(Transaction.StateEnum.UNKNOWN);
+            sTx.setDepthInBlocks(Integer.MIN_VALUE);
+            TransactionConfidence confidence = txOut.getParentTransaction().getConfidence();
+            if (confidence != null) {
+                switch (confidence.getConfidenceType()) {
+                    case BUILDING:
+                        sTx.setState(Transaction.StateEnum.BUILDING);
+                        sTx.setDepthInBlocks(confidence.getDepthInBlocks());
+                        break;
+                    case PENDING:
+                        sTx.setState(Transaction.StateEnum.PENDING);
+                        sTx.setDepthInBlocks(Integer.MIN_VALUE + confidence.numBroadcastPeers());
+                        break;
+                    case DEAD:
+                        sTx.setState(Transaction.StateEnum.DEAD);
+                        sTx.setDepthInBlocks(Integer.MIN_VALUE);
+                        break;
+                    case IN_CONFLICT:
+                        sTx.setState(Transaction.StateEnum.CONFLICT);
+                        sTx.setDepthInBlocks(Integer.MIN_VALUE);
+                        break;
+                    case UNKNOWN:
+                    default:
+                }
+            }
+            swaggerTxs[i] = sTx;
+        }
+        return swaggerTxs;
+    }
+
+
     public void start(){
         String workDir = System.getProperty("user.home") + "/." + PREFIX;
         new File(workDir).mkdirs();
@@ -143,12 +209,18 @@ public class Vault {
                 }
         );
 
+
+        UserWallet[] uws = vaultPersistence.recoverWallets(context);
+        for (UserWallet userWallet:uws) {
+            userWallets.put(userWallet.getId(),userWallet);
+            blockChain.addWallet(userWallet.getWallet());
+            peerGroup.addWallet(userWallet.getWallet());
+        }
+
     }
 
     public void stop(){
         peerGroup.stop();
     }
-
-
 
 }

@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
  * incoming or outgoing tx fullfilling an invoice
  */
 @ApiModel(description = "incoming or outgoing tx fullfilling an invoice")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T11:54:18.884Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T15:06:19.418Z")
 public class Transaction   {
   @JsonProperty("txid")
   private String txid = null;

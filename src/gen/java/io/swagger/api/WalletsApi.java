@@ -29,7 +29,7 @@ import javax.validation.constraints.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json", "text/plain" })
 @io.swagger.annotations.Api(description = "the wallets API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T11:54:18.884Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T15:06:19.418Z")
 public class WalletsApi  {
    private final WalletsApiService delegate = WalletsApiServiceFactory.getWalletsApi();
 
@@ -102,7 +102,7 @@ public class WalletsApi  {
         return delegate.getNewAddress(walletId,securityContext);
     }
     @GET
-    @Path("/{walletId}/publicSeed")
+    @Path("/{walletId}/publicseed")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
     @io.swagger.annotations.ApiOperation(value = "get the Public Seed of the keychain", notes = "", response = String.class, tags={  })
@@ -153,10 +153,10 @@ public class WalletsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = void.class) })
     public Response payoutCredit(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@ApiParam(value = "the payoutAddress" ,required=true) String body
+,@ApiParam(value = "the payoutAddress",required=true) @QueryParam("payoutaddress") String payoutaddress
 ,@ApiParam(value = "the authToken to payout this",required=true) @QueryParam("authToken") String authToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.payoutCredit(walletId,body,authToken,securityContext);
+        return delegate.payoutCredit(walletId,payoutaddress,authToken,securityContext);
     }
 }

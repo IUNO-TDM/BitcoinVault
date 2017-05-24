@@ -23,7 +23,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T11:54:18.884Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T15:06:19.418Z")
 public class WalletsApiServiceImpl extends WalletsApiService {
     private static final Logger logger = LoggerFactory.getLogger(WalletsApiServiceImpl.class);
     @Override
@@ -106,13 +106,33 @@ public class WalletsApiServiceImpl extends WalletsApiService {
     }
     @Override
     public Response getPublicSeed(UUID walletId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        Response resp;
+        Error err = new Error();
+        err.setMessage("success");
+        try{
+            String seed = Vault.getInstance().getPublicSeed(walletId);
+            resp = Response.status(200).entity(seed).type(MediaType.TEXT_PLAIN_TYPE).build();
+            logger.info(String.format("Public seed for wallet %s: %s", walletId, seed));
+        }catch (NullPointerException e){
+            err.setMessage("no wallet found for id " + walletId);
+            resp = Response.status(404).entity(err).build();
+        }
+        return resp;
     }
     @Override
     public Response getTransactions(UUID walletId, SecurityContext securityContext) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        Response resp;
+        Error err = new Error();
+        err.setMessage("success");
+        try{
+            Transaction[] transactions = Vault.getInstance().getTransactions(walletId);
+            resp = Response.status(200).entity(transactions).build();
+//            logger.info(String.format("Public seed for wallet %s: %s", walletId, transactions));
+        }catch (NullPointerException e){
+            err.setMessage("no wallet found for id " + walletId);
+            resp = Response.status(404).entity(err).build();
+        }
+        return resp;
     }
     @Override
     public Response getWalletId( @NotNull String userId, SecurityContext securityContext) throws NotFoundException {
@@ -128,12 +148,12 @@ public class WalletsApiServiceImpl extends WalletsApiService {
         return resp;
     }
     @Override
-    public Response payoutCredit(UUID walletId, String body,  @NotNull String authToken, SecurityContext securityContext) throws NotFoundException {
+    public Response payoutCredit(UUID walletId,  @NotNull String payoutaddress,  @NotNull String authToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
         try{
-            Vault.getInstance().payoutCredit(walletId,body);
+            Vault.getInstance().payoutCredit(walletId,payoutaddress);
             resp = Response.status(200).entity("Wallet emptied").type(MediaType.TEXT_PLAIN_TYPE).build();
             logger.info(String.format("Wallet emptied %s emptied", walletId));
         }catch (NullPointerException e){
