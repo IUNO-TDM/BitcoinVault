@@ -98,15 +98,17 @@ public class UserWallet {
         return wallet.currentReceiveAddress().toBase58();
     }
 
-    public void payoutCredit(Address payoutAddress){
+    public Transaction payoutCredit(Address payoutAddress){
         SendRequest sendRequest = SendRequest.emptyWallet(payoutAddress);
         try {
             wallet.completeTx(sendRequest);
             wallet.commitTx(sendRequest.tx);
+            return sendRequest.tx;
 
         } catch (InsufficientMoneyException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public String getPublicSeed(){

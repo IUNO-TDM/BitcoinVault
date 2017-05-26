@@ -11,18 +11,15 @@ import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.store.SPVBlockStore;
 import org.bitcoinj.utils.BriefLogFormatter;
-import org.bitcoinj.wallet.SendRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.Null;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -123,12 +120,14 @@ public class Vault {
         return userWallets.get(walletId).getLastAddress();
     }
 
-    public void payoutCredit(UUID walletId, String payoutAddress){
+    public String payoutCredit(UUID walletId, String payoutAddress, String authToken){
         if(!userWallets.containsKey(walletId)){
             throw new NullPointerException("no wallet with id " + walletId.toString());
         }
         //TODO At this point the auth token for this action should be checked
-        userWallets.get(walletId).payoutCredit(Address.fromBase58(context.getParams(),payoutAddress));
+        org.bitcoinj.core.Transaction tx =  userWallets.get(walletId).payoutCredit(Address.fromBase58(context.getParams(),payoutAddress));
+        peerGroup.broadcastTransaction(tx).broadcast();
+        return tx.getHash().toString();
     }
 
     public String getPublicSeed(UUID walletId){

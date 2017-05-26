@@ -1,7 +1,6 @@
 package io.swagger.api.impl;
 
 import io.swagger.api.*;
-import io.swagger.model.*;
 
 import io.swagger.model.Error;
 import io.swagger.model.Transaction;
@@ -9,13 +8,9 @@ import io.swagger.model.Transaction;
 import java.io.IOException;
 import java.util.UUID;
 
-import java.util.List;
 import io.swagger.api.NotFoundException;
 
-import java.io.InputStream;
-
 import iuno.tdm.vault.Vault;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,8 +148,8 @@ public class WalletsApiServiceImpl extends WalletsApiService {
         Error err = new Error();
         err.setMessage("success");
         try{
-            Vault.getInstance().payoutCredit(walletId,payoutaddress);
-            resp = Response.status(200).entity("Wallet emptied").type(MediaType.TEXT_PLAIN_TYPE).build();
+            String txHash = Vault.getInstance().payoutCredit(walletId,payoutaddress, authToken);
+            resp = Response.status(200).entity(txHash).type(MediaType.TEXT_PLAIN_TYPE).build();
             logger.info(String.format("Wallet emptied %s emptied", walletId));
         }catch (NullPointerException e){
             err.setMessage("no wallet found for id " + walletId);
