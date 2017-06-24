@@ -1,5 +1,6 @@
 package iuno.tdm.vault;
 
+import io.swagger.model.*;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.wallet.KeyChain;
@@ -12,6 +13,7 @@ import sun.management.Sensor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -29,8 +31,11 @@ public class UserWallet {
     private static final String PREFIX = "Vault";
     private static final Logger logger = LoggerFactory.getLogger(UserWallet.class);
     private File walletFile;
+    private HashMap<UUID,Payout>payouts = new HashMap<>();
+    private PeerGroup peerGroup;
 
-    public UserWallet(String userId, Context context) throws IOException {
+    public UserWallet(String userId, Context context, PeerGroup peerGroup) throws IOException {
+        this.peerGroup = peerGroup;
         id = UUID.randomUUID();
         this.userId = userId;
         this.context = context;
@@ -98,18 +103,6 @@ public class UserWallet {
         return wallet.currentReceiveAddress().toBase58();
     }
 
-    public Transaction payoutCredit(Address payoutAddress){
-        SendRequest sendRequest = SendRequest.emptyWallet(payoutAddress);
-        try {
-            wallet.completeTx(sendRequest);
-            wallet.commitTx(sendRequest.tx);
-            return sendRequest.tx;
-
-        } catch (InsufficientMoneyException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public String getPublicSeed(){
         return wallet.getActiveKeyChain().getWatchingKey().serializePubB58(context.getParams());
@@ -118,5 +111,39 @@ public class UserWallet {
     public TransactionOutput[] getTransactionOutputs(){
         List<TransactionOutput> transactionOutputs = wallet.getUnspents();
         return transactionOutputs.toArray(new TransactionOutput[transactionOutputs.size()]);
+    }
+
+    public Payout addPayout(Payout payout){
+        payout.setPayoutId(UUID.randomUUID());
+
+        SendRequest sendRequest = SendRequest.to(Address.fromBase58(context.getParams(),payout.getPayoutAddress()),
+                Coin.valueOf(payout.getAmount()));
+        try {
+            wallet.completeTx(sendRequest);
+            wallet.commitTx(sendRequest.tx);
+            peerGroup.broadcastTransaction(sendRequest.tx).broadcast();
+        } catch (InsufficientMoneyException e) {
+            e.printStackTrace();
+        }
+        payouts.put(payout.getPayoutId(),payout);
+
+        return payout;
+    }
+
+    public Payout getPayout(UUID payoutId){
+        if(!payouts.containsKey(payoutId)){
+            throw new NullPointerException("There is no payout with the id " + payoutId);
+        }
+
+        return payouts.get(payoutId);
+    }
+
+    public io.swagger.model.Transaction[] getTransactionsForPayout(UUID payoutId){
+        return  null;
+    }
+
+    public UUID[] getPayoutIDs(){
+        UUID[] uuids = payouts.keySet().toArray(new UUID[payouts.keySet().size()]);
+        return uuids;
     }
 }

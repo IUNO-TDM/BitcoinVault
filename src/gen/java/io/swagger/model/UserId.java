@@ -21,30 +21,31 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Error
+ * an object with the userid inside
  */
+@ApiModel(description = "an object with the userid inside")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-06-24T10:03:06.648Z")
-public class Error   {
-  @JsonProperty("message")
-  private String message = null;
+public class UserId   {
+  @JsonProperty("userId")
+  private String userId = null;
 
-  public Error message(String message) {
-    this.message = message;
+  public UserId userId(String userId) {
+    this.userId = userId;
     return this;
   }
 
    /**
-   * meaningful error message
-   * @return message
+   * Get userId
+   * @return userId
   **/
-  @JsonProperty("message")
-  @ApiModelProperty(value = "meaningful error message")
-  public String getMessage() {
-    return message;
+  @JsonProperty("userId")
+  @ApiModelProperty(value = "")
+  public String getUserId() {
+    return userId;
   }
 
-  public void setMessage(String message) {
-    this.message = message;
+  public void setUserId(String userId) {
+    this.userId = userId;
   }
 
 
@@ -56,22 +57,22 @@ public class Error   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Error error = (Error) o;
-    return Objects.equals(this.message, error.message);
+    UserId userId = (UserId) o;
+    return Objects.equals(this.userId, userId.userId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(message);
+    return Objects.hash(userId);
   }
 
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Error {\n");
+    sb.append("class UserId {\n");
     
-    sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

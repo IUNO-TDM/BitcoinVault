@@ -16,12 +16,15 @@ paths:
     post:
       summary: Creates a new wallet for a user
       operationId: addWallet
+      security: 
+        - Vault_Auth:
+          - create:wallet
       parameters:
-        - name: userId
-          description: the users ID the wallet is created for
-          in: query
-          required: true
-          type: string
+        - in: body
+          name: userId
+          description: the userId
+          schema:
+            $ref: '#/definitions/UserId'
       responses:
         '201':
           description: wallet created
@@ -31,6 +34,9 @@ paths:
     get:
       summary: returns wallet IDs for userID
       operationId: getWalletId
+      security: 
+        - Vault_Auth:
+          - read:wallet
       parameters:
         - name: userId
           description: the users ID the wallet is created for
@@ -48,6 +54,9 @@ paths:
     delete:
       summary: delete a user wallet
       operationId: deleteWallet
+      security: 
+        - Vault_Auth:
+          - delete:wallet
       parameters:
         - name: walletId
           description: the wallets ID
@@ -66,6 +75,9 @@ paths:
     get:
       summary: get current credit for wallet
       operationId: getCredit
+      security: 
+        - Vault_Auth:
+          - read:credit
       parameters:
         - name: walletId
           description: the wallets ID
@@ -86,6 +98,9 @@ paths:
     get:
       summary: get txs with utxo for wallet
       operationId: getTransactions
+      security: 
+        - Vault_Auth:
+          - read:credit
       parameters:
         - name: walletId
           description: the wallets ID
@@ -104,10 +119,13 @@ paths:
           description: no wallet with this id
           schema:
             $ref: '#/definitions/Error'
-  '/wallets/{walletId}/payoutaddress':
-    put:
-      summary: set PayoutAddress and iniate Payout
-      operationId: payoutCredit
+  '/wallets/{walletId}/payouts':
+    get:
+      summary: returns payout IDs
+      operationId: getPayoutsForWalletId
+      security: 
+        - Vault_Auth:
+          - read:payouts
       parameters:
         - name: walletId
           description: the wallets ID
@@ -115,19 +133,18 @@ paths:
           type: string
           format: uuid
           required: true
-        - name: payoutaddress
-          description: the payoutAddress
-          in: query
-          required: true
-          type: string
-        - name: authToken
-          description: the authToken to payout this
-          in: query
-          required: true
-          type: string
       responses:
         '200':
-          description: payout succeeded
+          description: payout IDs
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+          headers:
+            Location:
+              description: the absolute path to the created resource
+              type: string
         '403':
           description: wrong authCode or not authorized
           schema:
@@ -136,10 +153,119 @@ paths:
           description: no wallet with this id
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: set PayoutAddress and iniate Payout
+      operationId: createPayoutForWallet
+      security: 
+        - Vault_Auth:
+          - create:payout
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+        - name: payout
+          description: the payoutAddress
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Payout'
+      responses:
+        '201':
+          description: payout succeessfully created
+          schema:
+            $ref: '#/definitions/Payout'
+          headers:
+            Location:
+              description: the absolute path to the created resource
+              type: string
+        '403':
+          description: wrong authCode or not authorized
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/payouts/{payoutId}':
+    get:
+      summary: Get payout
+      operationId: getPayout
+      security: 
+        - Vault_Auth:
+          - read:payouts
+      parameters:
+      - name: walletId
+        description: the wallets ID
+        in: path
+        type: string
+        format: uuid
+        required: true
+      - name: payoutId
+        description: the payout ID
+        in: path
+        type: string
+        format: uuid
+        required: true
+      responses:
+        '200':
+          description: payout object
+          schema:
+            $ref: '#/definitions/Payout'
+        '403':
+          description: wrong authCode or not authorized
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  
+  '/wallets/{walletId}/payouts/{payoutId}/transactions':
+    get:
+      summary: Get payout transaction(s)
+      operationId: getPayoutTransactions
+      security: 
+        - Vault_Auth:
+          - read:payouts
+      parameters:
+      - name: walletId
+        description: the wallets ID
+        in: path
+        type: string
+        format: uuid
+        required: true
+      - name: payoutId
+        description: the payout ID
+        in: path
+        type: string
+        format: uuid
+        required: true
+      responses:
+        '200':
+          description: list of transactions
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Transaction'
+        '403':
+          description: wrong authCode or not authorized
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  
   '/wallets/{walletId}/newaddress':
     get:
       summary: get new receive address
       operationId: getNewAddress
+      security: 
+        - Vault_Auth:
+          - get:address
       parameters:
         - name: walletId
           description: the wallets ID
@@ -156,30 +282,13 @@ paths:
           description: no wallet with this id
           schema:
             $ref: '#/definitions/Error'
-  '/wallets/{walletId}/lastaddress':
-    get:
-      summary: get last receive address
-      operationId: getLastAddress
-      parameters:
-        - name: walletId
-          description: the wallets ID
-          in: path
-          type: string
-          format: uuid
-          required: true
-      responses:
-        '200':
-          description: here is the last reveiving address
-          schema:
-            type: string
-        '404':
-          description: no wallet with this id
-          schema:
-            $ref: '#/definitions/Error'
-  '/wallets/{walletId}/publicseed':
+  '/wallets/{walletId}/publicSeed':
     get:
       summary: get the Public Seed of the keychain
       operationId: getPublicSeed
+      security: 
+        - Vault_Auth:
+          - read:publicseed
       parameters:
         - name: walletId
           description: the wallets ID
@@ -196,7 +305,47 @@ paths:
           description: no wallet with this id
           schema:
             $ref: '#/definitions/Error'
+
+securityDefinitions:
+  Vault_Auth:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: http://none
+    tokenUrl: http://none
+    scopes:
+      create:wallet: Create a Wallet
+      read:wallet: Read Wallet information
+      delete:wallet: Delete a Wallet
+      read:credit: readout the credit for wallet
+      read:publicseed: get the publicseed for wallet
+      get:address: get a fresh address for a wallet
+      create:payout: create payout
+      read:payouts: get Payout information
+
 definitions:
+  Payout:
+    description: object describing a payout job
+    type: object
+    properties:
+      payoutId:
+        type: string
+        format: uuid
+      payoutAddress:
+        type: string
+      amount:
+        type: integer
+        format: int32
+      referenceId:
+        type: string
+        description: a place to put describing information
+
+  UserId:
+    description: an object with the userid inside
+    type: object
+    properties:
+      userId:
+        type: string
+
   Transaction:
     description: incoming or outgoing tx fullfilling an invoice
     type: object

@@ -8,8 +8,10 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.jaxrs.*;
 
 import io.swagger.model.Error;
+import io.swagger.model.Payout;
 import io.swagger.model.Transaction;
 import java.util.UUID;
+import io.swagger.model.UserId;
 
 import java.util.List;
 import io.swagger.api.NotFoundException;
@@ -29,7 +31,7 @@ import javax.validation.constraints.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json", "text/plain" })
 @io.swagger.annotations.Api(description = "the wallets API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-05-23T15:06:19.418Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-06-24T10:03:06.648Z")
 public class WalletsApi  {
    private final WalletsApiService delegate = WalletsApiServiceFactory.getWalletsApi();
 
@@ -37,126 +39,216 @@ public class WalletsApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "Creates a new wallet for a user", notes = "", response = String.class, tags={  })
+    @io.swagger.annotations.ApiOperation(value = "Creates a new wallet for a user", notes = "", response = String.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "create:wallet", description = "Create a Wallet")
+        })
+    }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "wallet created", response = String.class) })
-    public Response addWallet(@ApiParam(value = "the users ID the wallet is created for",required=true) @QueryParam("userId") String userId
+    public Response addWallet(@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "the userId" ) UserId userId
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.addWallet(userId,securityContext);
+        return delegate.addWallet(accessToken,userId,securityContext);
+    }
+    @POST
+    @Path("/{walletId}/payouts")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json", "text/plain" })
+    @io.swagger.annotations.ApiOperation(value = "set PayoutAddress and iniate Payout", notes = "", response = Payout.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "create:payout", description = "create payout")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 201, message = "payout succeessfully created", response = Payout.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 403, message = "wrong authCode or not authorized", response = Payout.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Payout.class) })
+    public Response createPayoutForWallet(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the payoutAddress" ,required=true) Payout payout
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.createPayoutForWallet(walletId,payout,accessToken,securityContext);
     }
     @DELETE
     @Path("/{walletId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "delete a user wallet", notes = "", response = void.class, tags={  })
+    @io.swagger.annotations.ApiOperation(value = "delete a user wallet", notes = "", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "delete:wallet", description = "Delete a Wallet")
+        })
+    }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = void.class) })
     public Response deleteWallet(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.deleteWallet(walletId,securityContext);
+        return delegate.deleteWallet(walletId,accessToken,securityContext);
     }
     @GET
     @Path("/{walletId}/credit")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "get current credit for wallet", notes = "", response = String.class, tags={  })
+    @io.swagger.annotations.ApiOperation(value = "get current credit for wallet", notes = "", response = String.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "read:credit", description = "readout the credit for wallet")
+        })
+    }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = String.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = String.class) })
     public Response getCredit(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.getCredit(walletId,securityContext);
-    }
-    @GET
-    @Path("/{walletId}/lastaddress")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "get last receive address", notes = "", response = String.class, tags={  })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "here is the last reveiving address", response = String.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = String.class) })
-    public Response getLastAddress(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@Context SecurityContext securityContext)
-    throws NotFoundException {
-        return delegate.getLastAddress(walletId,securityContext);
+        return delegate.getCredit(walletId,accessToken,securityContext);
     }
     @GET
     @Path("/{walletId}/newaddress")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "get new receive address", notes = "", response = String.class, tags={  })
+    @io.swagger.annotations.ApiOperation(value = "get new receive address", notes = "", response = String.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "get:address", description = "get a fresh address for a wallet")
+        })
+    }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "here is a new reveiving address", response = String.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = String.class) })
     public Response getNewAddress(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.getNewAddress(walletId,securityContext);
+        return delegate.getNewAddress(walletId,accessToken,securityContext);
     }
     @GET
-    @Path("/{walletId}/publicseed")
+    @Path("/{walletId}/payouts/{payoutId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "get the Public Seed of the keychain", notes = "", response = String.class, tags={  })
+    @io.swagger.annotations.ApiOperation(value = "Get payout", notes = "", response = Payout.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "read:payouts", description = "get Payout information")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "payout object", response = Payout.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 403, message = "wrong authCode or not authorized", response = Payout.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Payout.class) })
+    public Response getPayout(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the payout ID",required=true) @PathParam("payoutId") UUID payoutId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.getPayout(walletId,payoutId,accessToken,securityContext);
+    }
+    @GET
+    @Path("/{walletId}/payouts/{payoutId}/transactions")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json", "text/plain" })
+    @io.swagger.annotations.ApiOperation(value = "Get payout transaction(s)", notes = "", response = Transaction.class, responseContainer = "List", authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "read:payouts", description = "get Payout information")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "list of transactions", response = Transaction.class, responseContainer = "List"),
+        
+        @io.swagger.annotations.ApiResponse(code = 403, message = "wrong authCode or not authorized", response = Transaction.class, responseContainer = "List"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Transaction.class, responseContainer = "List") })
+    public Response getPayoutTransactions(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the payout ID",required=true) @PathParam("payoutId") UUID payoutId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.getPayoutTransactions(walletId,payoutId,accessToken,securityContext);
+    }
+    @GET
+    @Path("/{walletId}/payouts")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json", "text/plain" })
+    @io.swagger.annotations.ApiOperation(value = "returns payout IDs", notes = "", response = UUID.class, responseContainer = "List", authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "read:payouts", description = "get Payout information")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "payout IDs", response = UUID.class, responseContainer = "List"),
+        
+        @io.swagger.annotations.ApiResponse(code = 403, message = "wrong authCode or not authorized", response = UUID.class, responseContainer = "List"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = UUID.class, responseContainer = "List") })
+    public Response getPayoutsForWalletId(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.getPayoutsForWalletId(walletId,accessToken,securityContext);
+    }
+    @GET
+    @Path("/{walletId}/publicSeed")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json", "text/plain" })
+    @io.swagger.annotations.ApiOperation(value = "get the Public Seed of the keychain", notes = "", response = String.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "read:publicseed", description = "get the publicseed for wallet")
+        })
+    }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "here is the public seed", response = String.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = String.class) })
     public Response getPublicSeed(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.getPublicSeed(walletId,securityContext);
+        return delegate.getPublicSeed(walletId,accessToken,securityContext);
     }
     @GET
     @Path("/{walletId}/transactions")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "get txs with utxo for wallet", notes = "", response = Transaction.class, responseContainer = "List", tags={  })
+    @io.swagger.annotations.ApiOperation(value = "get txs with utxo for wallet", notes = "", response = Transaction.class, responseContainer = "List", authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "read:credit", description = "readout the credit for wallet")
+        })
+    }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = Transaction.class, responseContainer = "List"),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Transaction.class, responseContainer = "List") })
     public Response getTransactions(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.getTransactions(walletId,securityContext);
+        return delegate.getTransactions(walletId,accessToken,securityContext);
     }
     @GET
     
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "returns wallet IDs for userID", notes = "", response = String.class, responseContainer = "List", tags={  })
+    @io.swagger.annotations.ApiOperation(value = "returns wallet IDs for userID", notes = "", response = String.class, responseContainer = "List", authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "read:wallet", description = "Read Wallet information")
+        })
+    }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "wallet IDs for UserID", response = String.class, responseContainer = "List") })
     public Response getWalletId(@ApiParam(value = "the users ID the wallet is created for",required=true) @QueryParam("userId") String userId
+,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
-        return delegate.getWalletId(userId,securityContext);
-    }
-    @PUT
-    @Path("/{walletId}/payoutaddress")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json", "text/plain" })
-    @io.swagger.annotations.ApiOperation(value = "set PayoutAddress and iniate Payout", notes = "", response = void.class, tags={  })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "payout succeeded", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 403, message = "wrong authCode or not authorized", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = void.class) })
-    public Response payoutCredit(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@ApiParam(value = "the payoutAddress",required=true) @QueryParam("payoutaddress") String payoutaddress
-,@ApiParam(value = "the authToken to payout this",required=true) @QueryParam("authToken") String authToken
-,@Context SecurityContext securityContext)
-    throws NotFoundException {
-        return delegate.payoutCredit(walletId,payoutaddress,authToken,securityContext);
+        return delegate.getWalletId(userId,accessToken,securityContext);
     }
 }

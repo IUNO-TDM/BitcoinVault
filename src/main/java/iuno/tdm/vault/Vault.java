@@ -3,6 +3,7 @@ package iuno.tdm.vault;
 import ch.qos.logback.classic.Level;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import io.swagger.model.Payout;
 import io.swagger.model.Transaction;
 import org.bitcoinj.core.*;
 import org.bitcoinj.core.listeners.DownloadProgressTracker;
@@ -11,6 +12,7 @@ import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.store.SPVBlockStore;
 import org.bitcoinj.utils.BriefLogFormatter;
+import org.bitcoinj.wallet.Wallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +69,7 @@ public class Vault {
     }
 
     public UUID createWallet(String userId) throws IOException {
-        UserWallet wallet = new UserWallet(userId, context);
+        UserWallet wallet = new UserWallet(userId, context, peerGroup);
         blockChain.addWallet(wallet.getWallet());
         peerGroup.addWallet(wallet.getWallet());
         userWallets.put(wallet.getId(),wallet);
@@ -120,14 +122,13 @@ public class Vault {
         return userWallets.get(walletId).getLastAddress();
     }
 
-    public String payoutCredit(UUID walletId, String payoutAddress, String authToken){
+
+    public Payout addPayoutForWallet(Payout payout, UUID walletId){
         if(!userWallets.containsKey(walletId)){
             throw new NullPointerException("no wallet with id " + walletId.toString());
         }
-        //TODO At this point the auth token for this action should be checked
-        org.bitcoinj.core.Transaction tx =  userWallets.get(walletId).payoutCredit(Address.fromBase58(context.getParams(),payoutAddress));
-        peerGroup.broadcastTransaction(tx).broadcast();
-        return tx.getHash().toString();
+        return userWallets.get(walletId).addPayout(payout);
+
     }
 
     public String getPublicSeed(UUID walletId){
@@ -218,6 +219,35 @@ public class Vault {
             peerGroup.addWallet(userWallet.getWallet());
         }
 
+    }
+
+    public String getUserIdForWalletId(UUID walletId){
+        if(userWallets.containsKey(walletId)){
+            throw new NullPointerException("no wallet with id " + walletId.toString());
+        }
+        return userWallets.get(walletId).getUserId();
+    }
+
+    public Payout getPayoutForIdAndWallet(UUID payoutId, UUID walletId){
+        if(userWallets.containsKey(walletId)){
+            throw new NullPointerException("no wallet with id " + walletId.toString());
+        }
+        return userWallets.get(walletId).getPayout(payoutId);
+    }
+
+    public UUID[] getPayoutIdsForWallet(UUID walletId){
+        if(userWallets.containsKey(walletId)){
+            throw new NullPointerException("no wallet with id " + walletId.toString());
+        }
+        return userWallets.get(walletId).getPayoutIDs();
+
+    }
+
+    public Transaction[] getTransactionsForPayoutAndWallet(UUID payoutId, UUID walletId){
+        if(userWallets.containsKey(walletId)){
+            throw new NullPointerException("no wallet with id " + walletId.toString());
+        }
+        return userWallets.get(walletId).getTransactionsForPayout(payoutId);
     }
 
     public void stop(){
