@@ -25,6 +25,11 @@ paths:
           description: the userId
           schema:
             $ref: '#/definitions/UserId'
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '201':
           description: wallet created
@@ -40,6 +45,11 @@ paths:
       parameters:
         - name: userId
           description: the users ID the wallet is created for
+          in: query
+          required: true
+          type: string
+        - name: accessToken
+          description: oauth2 accessToken
           in: query
           required: true
           type: string
@@ -64,6 +74,11 @@ paths:
           type: string
           format: uuid
           required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '200':
           description: OK
@@ -85,6 +100,11 @@ paths:
           type: string
           format: uuid
           required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '200':
           description: OK
@@ -108,6 +128,11 @@ paths:
           type: string
           format: uuid
           required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '200':
           description: OK
@@ -133,6 +158,11 @@ paths:
           type: string
           format: uuid
           required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '200':
           description: payout IDs
@@ -172,6 +202,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Payout'
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '201':
           description: payout succeessfully created
@@ -209,6 +244,11 @@ paths:
         type: string
         format: uuid
         required: true
+      - name: accessToken
+        description: oauth2 accessToken
+        in: query
+        required: true
+        type: string
       responses:
         '200':
           description: payout object
@@ -243,6 +283,11 @@ paths:
         type: string
         format: uuid
         required: true
+      - name: accessToken
+        description: oauth2 accessToken
+        in: query
+        required: true
+        type: string
       responses:
         '200':
           description: list of transactions
@@ -273,6 +318,11 @@ paths:
           type: string
           format: uuid
           required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '200':
           description: here is a new reveiving address
@@ -296,6 +346,11 @@ paths:
           type: string
           format: uuid
           required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '200':
           description: here is the public seed
@@ -335,6 +390,9 @@ definitions:
       amount:
         type: integer
         format: int32
+      emptyWallet:
+        type: boolean
+        description: if true, the amount value will be the maximum value paid out. but it will also payout if there is less balance in the wallet
       referenceId:
         type: string
         description: a place to put describing information

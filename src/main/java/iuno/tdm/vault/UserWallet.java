@@ -2,20 +2,16 @@ package iuno.tdm.vault;
 
 import io.swagger.model.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.wallet.KeyChain;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.UnreadableWalletException;
 import org.bitcoinj.wallet.Wallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.management.Sensor;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -99,10 +95,6 @@ public class UserWallet {
         return wallet.freshReceiveAddress().toBase58();
     }
 
-    public String getLastAddress(){
-        return wallet.currentReceiveAddress().toBase58();
-    }
-
 
     public String getPublicSeed(){
         return wallet.getActiveKeyChain().getWatchingKey().serializePubB58(context.getParams());
@@ -113,11 +105,31 @@ public class UserWallet {
         return transactionOutputs.toArray(new TransactionOutput[transactionOutputs.size()]);
     }
 
-    public Payout addPayout(Payout payout){
+    public Payout addPayout(Payout payout) {
         payout.setPayoutId(UUID.randomUUID());
-
-        SendRequest sendRequest = SendRequest.to(Address.fromBase58(context.getParams(),payout.getPayoutAddress()),
+        SendRequest preSendRequest = SendRequest.to(Address.fromBase58(context.getParams(),payout.getPayoutAddress()),
                 Coin.valueOf(payout.getAmount()));
+
+
+        SendRequest sendRequest;
+        if(wallet.getBalance().equals(Coin.ZERO)){
+            throw new IllegalArgumentException("Wallet is empty");
+        }else{
+            if(payout.getEmptyWallet()){
+                if(wallet.getBalance().isGreaterThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))){
+                    sendRequest = preSendRequest;
+                }else{
+                    sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(),payout.getPayoutAddress()));
+                }
+            }else{
+                if(wallet.getBalance().isLessThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))){
+                    throw new IllegalArgumentException("Wallet balance is to low for amount plus fee");
+                }else{
+                    sendRequest = preSendRequest;
+                }
+            }
+        }
+
         try {
             wallet.completeTx(sendRequest);
             wallet.commitTx(sendRequest.tx);

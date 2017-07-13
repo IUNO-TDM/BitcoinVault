@@ -115,13 +115,6 @@ public class Vault {
         return userWallets.get(walletId).getFreshAddress();
     }
 
-    public String getLastAddress(UUID walletId){
-        if(!userWallets.containsKey(walletId)){
-            throw new NullPointerException("no wallet with id " + walletId.toString());
-        }
-        return userWallets.get(walletId).getLastAddress();
-    }
-
 
     public Payout addPayoutForWallet(Payout payout, UUID walletId){
         if(!userWallets.containsKey(walletId)){
@@ -222,21 +215,21 @@ public class Vault {
     }
 
     public String getUserIdForWalletId(UUID walletId){
-        if(userWallets.containsKey(walletId)){
+        if(!userWallets.containsKey(walletId)){
             throw new NullPointerException("no wallet with id " + walletId.toString());
         }
         return userWallets.get(walletId).getUserId();
     }
 
     public Payout getPayoutForIdAndWallet(UUID payoutId, UUID walletId){
-        if(userWallets.containsKey(walletId)){
+        if(!userWallets.containsKey(walletId)){
             throw new NullPointerException("no wallet with id " + walletId.toString());
         }
         return userWallets.get(walletId).getPayout(payoutId);
     }
 
     public UUID[] getPayoutIdsForWallet(UUID walletId){
-        if(userWallets.containsKey(walletId)){
+        if(!userWallets.containsKey(walletId)){
             throw new NullPointerException("no wallet with id " + walletId.toString());
         }
         return userWallets.get(walletId).getPayoutIDs();
@@ -244,7 +237,7 @@ public class Vault {
     }
 
     public Transaction[] getTransactionsForPayoutAndWallet(UUID payoutId, UUID walletId){
-        if(userWallets.containsKey(walletId)){
+        if(!userWallets.containsKey(walletId)){
             throw new NullPointerException("no wallet with id " + walletId.toString());
         }
         return userWallets.get(walletId).getTransactionsForPayout(payoutId);

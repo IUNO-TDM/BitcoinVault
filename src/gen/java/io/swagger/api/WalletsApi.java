@@ -31,7 +31,7 @@ import javax.validation.constraints.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json", "text/plain" })
 @io.swagger.annotations.Api(description = "the wallets API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-06-24T10:03:06.648Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
 public class WalletsApi  {
    private final WalletsApiService delegate = WalletsApiServiceFactory.getWalletsApi();
 
@@ -46,7 +46,7 @@ public class WalletsApi  {
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "wallet created", response = String.class) })
-    public Response addWallet(@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+    public Response addWallet(@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@ApiParam(value = "the userId" ) UserId userId
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
@@ -69,7 +69,7 @@ public class WalletsApi  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Payout.class) })
     public Response createPayoutForWallet(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
 ,@ApiParam(value = "the payoutAddress" ,required=true) Payout payout
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.createPayoutForWallet(walletId,payout,accessToken,securityContext);
@@ -88,7 +88,7 @@ public class WalletsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = void.class) })
     public Response deleteWallet(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.deleteWallet(walletId,accessToken,securityContext);
@@ -107,7 +107,7 @@ public class WalletsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = String.class) })
     public Response getCredit(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.getCredit(walletId,accessToken,securityContext);
@@ -126,7 +126,7 @@ public class WalletsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = String.class) })
     public Response getNewAddress(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.getNewAddress(walletId,accessToken,securityContext);
@@ -148,7 +148,7 @@ public class WalletsApi  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Payout.class) })
     public Response getPayout(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
 ,@ApiParam(value = "the payout ID",required=true) @PathParam("payoutId") UUID payoutId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.getPayout(walletId,payoutId,accessToken,securityContext);
@@ -170,7 +170,7 @@ public class WalletsApi  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Transaction.class, responseContainer = "List") })
     public Response getPayoutTransactions(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
 ,@ApiParam(value = "the payout ID",required=true) @PathParam("payoutId") UUID payoutId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.getPayoutTransactions(walletId,payoutId,accessToken,securityContext);
@@ -191,7 +191,7 @@ public class WalletsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = UUID.class, responseContainer = "List") })
     public Response getPayoutsForWalletId(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.getPayoutsForWalletId(walletId,accessToken,securityContext);
@@ -210,7 +210,7 @@ public class WalletsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = String.class) })
     public Response getPublicSeed(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.getPublicSeed(walletId,accessToken,securityContext);
@@ -229,7 +229,7 @@ public class WalletsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Transaction.class, responseContainer = "List") })
     public Response getTransactions(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.getTransactions(walletId,accessToken,securityContext);
@@ -246,7 +246,7 @@ public class WalletsApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "wallet IDs for UserID", response = String.class, responseContainer = "List") })
     public Response getWalletId(@ApiParam(value = "the users ID the wallet is created for",required=true) @QueryParam("userId") String userId
-,@ApiParam(value = "the OAuth2 Access Token",required=true) @QueryParam("accessToken") String accessToken
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.getWalletId(userId,accessToken,securityContext);

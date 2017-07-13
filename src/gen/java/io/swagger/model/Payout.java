@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
  * object describing a payout job
  */
 @ApiModel(description = "object describing a payout job")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-06-24T10:03:06.648Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
 public class Payout   {
   @JsonProperty("payoutId")
   private UUID payoutId = null;
@@ -35,6 +35,9 @@ public class Payout   {
 
   @JsonProperty("amount")
   private Integer amount = null;
+
+  @JsonProperty("emptyWallet")
+  private Boolean emptyWallet = null;
 
   @JsonProperty("referenceId")
   private String referenceId = null;
@@ -96,6 +99,25 @@ public class Payout   {
     this.amount = amount;
   }
 
+  public Payout emptyWallet(Boolean emptyWallet) {
+    this.emptyWallet = emptyWallet;
+    return this;
+  }
+
+   /**
+   * if true, the amount value will be the maximum value paid out. but it will also payout if there is less balance in the wallet
+   * @return emptyWallet
+  **/
+  @JsonProperty("emptyWallet")
+  @ApiModelProperty(value = "if true, the amount value will be the maximum value paid out. but it will also payout if there is less balance in the wallet")
+  public Boolean getEmptyWallet() {
+    return emptyWallet;
+  }
+
+  public void setEmptyWallet(Boolean emptyWallet) {
+    this.emptyWallet = emptyWallet;
+  }
+
   public Payout referenceId(String referenceId) {
     this.referenceId = referenceId;
     return this;
@@ -128,12 +150,13 @@ public class Payout   {
     return Objects.equals(this.payoutId, payout.payoutId) &&
         Objects.equals(this.payoutAddress, payout.payoutAddress) &&
         Objects.equals(this.amount, payout.amount) &&
+        Objects.equals(this.emptyWallet, payout.emptyWallet) &&
         Objects.equals(this.referenceId, payout.referenceId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(payoutId, payoutAddress, amount, referenceId);
+    return Objects.hash(payoutId, payoutAddress, amount, emptyWallet, referenceId);
   }
 
 
@@ -145,6 +168,7 @@ public class Payout   {
     sb.append("    payoutId: ").append(toIndentedString(payoutId)).append("\n");
     sb.append("    payoutAddress: ").append(toIndentedString(payoutAddress)).append("\n");
     sb.append("    amount: ").append(toIndentedString(amount)).append("\n");
+    sb.append("    emptyWallet: ").append(toIndentedString(emptyWallet)).append("\n");
     sb.append("    referenceId: ").append(toIndentedString(referenceId)).append("\n");
     sb.append("}");
     return sb.toString();

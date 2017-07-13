@@ -23,7 +23,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-06-24T10:03:06.648Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
 public class WalletsApiServiceImpl extends WalletsApiService {
     private static final OAuthValidator VALIDATOR = new OAuthValidator("oauthHost");
     private static final Logger logger = LoggerFactory.getLogger(WalletsApiServiceImpl.class);
@@ -74,22 +74,23 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.parameter("create:payout",
                                     new String[]{payout.getPayoutAddress(), payout.getAmount().toString()})});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
             }else{
-//                try {
+                try {
                     payout = Vault.getInstance().addPayoutForWallet(payout, walletId);
-
                     resp = Response.status(201).entity(walletId.toString()).entity(payout).build();
                     logger.info(String.format("Created new payout %s", payout.getPayoutId()));
-//                } catch (IOException e) {
-//                    err.setMessage(e.getMessage());
-//                    resp = Response.status(500).entity(err).build();
-//                }
+                } catch (Exception e) {
+                    err.setMessage(e.getMessage());
+                    resp = Response.status(500).entity(err).build();
+                }
+
+
             }
 
         }
@@ -110,7 +111,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId, "admin"}, //TODO Check if admin is necessary
                             new Scope[]{Scope.simple("delete:wallet")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
@@ -144,7 +145,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.simple("read:credit")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
@@ -181,7 +182,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.simple("get:address")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
@@ -216,7 +217,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.simple("read:payouts")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
@@ -244,7 +245,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.simple("read:payouts")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
@@ -272,7 +273,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.simple("read:payouts")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
@@ -300,7 +301,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.simple("read:publicseed")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
@@ -333,7 +334,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.simple("read:credit")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");
@@ -365,7 +366,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
         }else{
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId},
+                            new String[]{userId,"admin"},
                             new Scope[]{Scope.simple("read:wallet")});
             if(!accessRule.applyValidation(validation)){
                 err.setMessage("Wrong scope or user");

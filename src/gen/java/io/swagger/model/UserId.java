@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
  * an object with the userid inside
  */
 @ApiModel(description = "an object with the userid inside")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-06-24T10:03:06.648Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
 public class UserId   {
   @JsonProperty("userId")
   private String userId = null;

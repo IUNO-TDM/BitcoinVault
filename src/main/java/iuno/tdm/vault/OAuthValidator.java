@@ -27,7 +27,14 @@ public class OAuthValidator{
 
     public Validation validateToken(String token){
         //TODO implement
-        return new Validation(true, token, "admin",new Scope[]{Scope.simple("")});
+        return new Validation(true, token, "admin",new Scope[]{
+                Scope.simple("write:wallet"),
+                Scope.simple("read:wallet"),
+                Scope.simple("create:payout"),
+                Scope.simple("delete:wallet"),
+                Scope.simple("read:publicseed"),
+                Scope.simple("read:credit"),
+                Scope.simple("read:payouts")});
     }
 
 
