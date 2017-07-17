@@ -1,0 +1,236 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Vault",
+		"_postman_id": "34ecaeba-805a-e5e8-4ca0-d58a60e03052",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Delete Wallet",
+			"request": {
+				"url": {
+					"raw": "http://localhost:8080/v1/wallets/d33c3871-2a0c-4774-9ed9-a30f5e8e1939?accessToken=4711",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"wallets",
+						"d33c3871-2a0c-4774-9ed9-a30f5e8e1939"
+					],
+					"query": [
+						{
+							"key": "accessToken",
+							"value": "4711",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"totalAmount\": 100000,\n  \"expiration\": \"2017-06-05T15:45:09.680Z\",\n  \"referenceId\":\"1\",\n  \"transfers\": [\n    {\n      \"address\": \"n3sSfx6YXN8iLuU1c8wrpLDHVyt6DU3RXU\",\n      \"coin\": 70000\n    }\n  ]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create Wallet",
+			"request": {
+				"url": {
+					"raw": "http://localhost:8080/v1/wallets?accessToken=4711",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"wallets"
+					],
+					"query": [
+						{
+							"key": "accessToken",
+							"value": "4711",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"sdfghjkl\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Wallet",
+			"request": {
+				"url": "http://localhost:8080/v1/wallets?userId=12345",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"totalAmount\": 100000,\n  \"expiration\": \"2017-06-05T15:45:09.680Z\",\n  \"referenceId\":\"1\",\n  \"transfers\": [\n    {\n      \"address\": \"n3sSfx6YXN8iLuU1c8wrpLDHVyt6DU3RXU\",\n      \"coin\": 70000\n    }\n  ]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Credit",
+			"request": {
+				"url": {
+					"raw": "http://localhost:8080/v1/wallets/d33c3871-2a0c-4774-9ed9-a30f5e8e1939/credit?accessToken=4711",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"wallets",
+						"d33c3871-2a0c-4774-9ed9-a30f5e8e1939",
+						"credit"
+					],
+					"query": [
+						{
+							"key": "accessToken",
+							"value": "4711",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"totalAmount\": 100000,\n  \"expiration\": \"2017-06-05T15:45:09.680Z\",\n  \"referenceId\":\"1\",\n  \"transfers\": [\n    {\n      \"address\": \"n3sSfx6YXN8iLuU1c8wrpLDHVyt6DU3RXU\",\n      \"coin\": 70000\n    }\n  ]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Transactions",
+			"request": {
+				"url": {
+					"raw": "http://localhost:8080/v1/wallets/536c7bb9-e5c0-4907-818a-3cb7f4a49585/transactions?accessToken=4711",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"wallets",
+						"536c7bb9-e5c0-4907-818a-3cb7f4a49585",
+						"transactions"
+					],
+					"query": [
+						{
+							"key": "accessToken",
+							"value": "4711",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"totalAmount\": 100000,\n  \"expiration\": \"2017-06-05T15:45:09.680Z\",\n  \"referenceId\":\"1\",\n  \"transfers\": [\n    {\n      \"address\": \"n3sSfx6YXN8iLuU1c8wrpLDHVyt6DU3RXU\",\n      \"coin\": 70000\n    }\n  ]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get New Address",
+			"request": {
+				"url": "http://localhost:8080/v1/wallets/8ac0181b-6659-4d8e-b1ba-22f76e93c99e/newaddress",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"totalAmount\": 100000,\n  \"expiration\": \"2017-06-05T15:45:09.680Z\",\n  \"referenceId\":\"1\",\n  \"transfers\": [\n    {\n      \"address\": \"n3sSfx6YXN8iLuU1c8wrpLDHVyt6DU3RXU\",\n      \"coin\": 70000\n    }\n  ]\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Payout credit",
+			"request": {
+				"url": "http://localhost:8080/v1/wallets/5df38afa-a211-4ed4-8033-b23ca7eee563/payouts",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payoutId\": \"\",\n\t\"payoutAddress\":\"mgBMbmHSYEEtiyNiq8KDKGanCdweoQwGmQ\",\n\t\"amount\":1000,\n\t\"emptyWallet\":true,\n\t\"referenceId\":\"456789\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
