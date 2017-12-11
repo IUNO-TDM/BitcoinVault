@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
  * incoming or outgoing tx fullfilling an invoice
  */
 @ApiModel(description = "incoming or outgoing tx fullfilling an invoice")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-07T14:48:59.249Z")
 public class Transaction   {
   @JsonProperty("txid")
   private String txid = null;
@@ -81,10 +81,10 @@ public class Transaction   {
     return this;
   }
 
-   /**
+  /**
    * the txid
    * @return txid
-  **/
+   **/
   @JsonProperty("txid")
   @ApiModelProperty(value = "the txid")
   public String getTxid() {
@@ -100,10 +100,10 @@ public class Transaction   {
     return this;
   }
 
-   /**
+  /**
    * confidence state
    * @return state
-  **/
+   **/
   @JsonProperty("state")
   @ApiModelProperty(value = "confidence state")
   public StateEnum getState() {
@@ -119,10 +119,10 @@ public class Transaction   {
     return this;
   }
 
-   /**
+  /**
    * depth of a building transaction in blocks
    * @return depthInBlocks
-  **/
+   **/
   @JsonProperty("depthInBlocks")
   @ApiModelProperty(value = "depth of a building transaction in blocks")
   public Integer getDepthInBlocks() {
@@ -138,10 +138,10 @@ public class Transaction   {
     return this;
   }
 
-   /**
+  /**
    * The amount of satoshies received by this tx
    * @return amount
-  **/
+   **/
   @JsonProperty("amount")
   @ApiModelProperty(value = "The amount of satoshies received by this tx")
   public Integer getAmount() {

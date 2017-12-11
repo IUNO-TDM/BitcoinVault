@@ -21,6 +21,7 @@ import java.io.InputStream;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -31,9 +32,30 @@ import javax.validation.constraints.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json", "text/plain" })
 @io.swagger.annotations.Api(description = "the wallets API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-07T14:48:59.249Z")
 public class WalletsApi  {
-   private final WalletsApiService delegate = WalletsApiServiceFactory.getWalletsApi();
+   private final WalletsApiService delegate;
+
+   public WalletsApi(@Context ServletConfig servletContext) {
+      WalletsApiService delegate = null;
+
+      if (servletContext != null) {
+         String implClass = servletContext.getInitParameter("WalletsApi.implementation");
+         if (implClass != null && !"".equals(implClass.trim())) {
+            try {
+               delegate = (WalletsApiService) Class.forName(implClass).newInstance();
+            } catch (Exception e) {
+               throw new RuntimeException(e);
+            }
+         } 
+      }
+
+      if (delegate == null) {
+         delegate = WalletsApiServiceFactory.getWalletsApi();
+      }
+
+      this.delegate = delegate;
+   }
 
     @POST
     
@@ -92,6 +114,25 @@ public class WalletsApi  {
 ,@Context SecurityContext securityContext)
     throws NotFoundException {
         return delegate.deleteWallet(walletId,accessToken,securityContext);
+    }
+    @GET
+    @Path("/{walletId}/confirmedcredit")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json", "text/plain" })
+    @io.swagger.annotations.ApiOperation(value = "get current confirmed credit for wallet", notes = "", response = String.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "read:credit", description = "readout the credit for wallet")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = String.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = String.class) })
+    public Response getConfirmedCredit(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.getConfirmedCredit(walletId,accessToken,securityContext);
     }
     @GET
     @Path("/{walletId}/credit")

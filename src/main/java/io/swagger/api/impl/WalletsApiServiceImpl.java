@@ -131,6 +131,44 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
         return resp;
     }
+
+    @Override
+    public Response getConfirmedCredit(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+        Response resp;
+        Error err = new Error();
+        err.setMessage("success");
+
+        OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
+        if(!validation.valid){
+            err.setMessage("Validation of AccessToken not successful");
+            resp = Response.status(403).entity(err).build();
+        }else{
+            String userId = Vault.getInstance().getUserIdForWalletId(walletId);
+            AccessRule accessRule =
+                    new AccessRule(
+                            new String[]{userId,"admin"},
+                            new Scope[]{Scope.simple("read:credit")});
+            if(!accessRule.applyValidation(validation)){
+                err.setMessage("Wrong scope or user");
+                resp = Response.status(403).entity(err).build();
+            }else{
+
+                try{
+                    long credit = Vault.getInstance().getConfirmedCredit(walletId);
+                    resp = Response.status(200).entity(String.format("%d",credit)).type(MediaType.TEXT_PLAIN_TYPE).build();
+                    logger.info(String.format("Got confirmed credit wallet %s:%d", walletId, credit));
+                }catch (NullPointerException e){
+                    err.setMessage("no wallet found for id " + walletId);
+                    resp = Response.status(404).entity(err).build();
+                }
+            }
+
+        }
+
+        return resp;
+
+    }
+
     @Override
     public Response getCredit(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;

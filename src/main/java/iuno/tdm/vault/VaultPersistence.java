@@ -1,6 +1,7 @@
 package iuno.tdm.vault;
 
 import org.bitcoinj.core.Context;
+import org.bitcoinj.core.PeerGroup;
 import org.bitcoinj.wallet.UnreadableWalletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,7 @@ public class VaultPersistence {
         }
     }
 
-    public UserWallet[] recoverWallets(Context context) {
+    public UserWallet[] recoverWallets(Context context, PeerGroup peerGroup) {
         ArrayList<UserWallet> userWallets = new ArrayList<>();
         Statement statement = null;
         try {
@@ -93,7 +94,7 @@ public class VaultPersistence {
                 String userId = rs.getString("userId");
                 String walletFileName = rs.getString("walletFile");
                 try {
-                    userWallets.add(new UserWallet(walletId,userId,context,walletFileName));
+                    userWallets.add(new UserWallet(walletId,userId,context,walletFileName, peerGroup));
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (UnreadableWalletException e) {

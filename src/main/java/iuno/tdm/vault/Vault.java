@@ -96,6 +96,12 @@ public class Vault {
         }
         return userWallets.get(walletId).getBalance().getValue();
     }
+    public long getConfirmedCredit(UUID walletId) throws NullPointerException{
+        if(!userWallets.containsKey(walletId)){
+            throw new NullPointerException("no wallet with id " + walletId.toString());
+        }
+        return userWallets.get(walletId).getConfirmedBalance().getValue();
+    }
 
     public UUID[] getWalletIds(String userId){
         ArrayList<UUID> ids = new ArrayList<>();
@@ -189,6 +195,7 @@ public class Vault {
         }
         peerGroup = new PeerGroup(context, blockChain);
         peerGroup.addPeerDiscovery(new DnsDiscovery(context.getParams()));
+
         Futures.addCallback(peerGroup.startAsync(), new FutureCallback() {
                     @Override
                     public void onSuccess(@Nullable Object o) {
@@ -205,7 +212,7 @@ public class Vault {
         );
 
 
-        UserWallet[] uws = vaultPersistence.recoverWallets(context);
+        UserWallet[] uws = vaultPersistence.recoverWallets(context, peerGroup);
         for (UserWallet userWallet:uws) {
             userWallets.put(userWallet.getId(),userWallet);
             blockChain.addWallet(userWallet.getWallet());

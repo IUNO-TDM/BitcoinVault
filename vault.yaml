@@ -16,9 +16,9 @@ paths:
     post:
       summary: Creates a new wallet for a user
       operationId: addWallet
-      security: 
+      security:
         - Vault_Auth:
-          - create:wallet
+            - 'create:wallet'
       parameters:
         - in: body
           name: userId
@@ -39,9 +39,9 @@ paths:
     get:
       summary: returns wallet IDs for userID
       operationId: getWalletId
-      security: 
+      security:
         - Vault_Auth:
-          - read:wallet
+            - 'read:wallet'
       parameters:
         - name: userId
           description: the users ID the wallet is created for
@@ -64,9 +64,9 @@ paths:
     delete:
       summary: delete a user wallet
       operationId: deleteWallet
-      security: 
+      security:
         - Vault_Auth:
-          - delete:wallet
+            - 'delete:wallet'
       parameters:
         - name: walletId
           description: the wallets ID
@@ -90,9 +90,37 @@ paths:
     get:
       summary: get current credit for wallet
       operationId: getCredit
-      security: 
+      security:
         - Vault_Auth:
-          - read:credit
+            - 'read:credit'
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/confirmedcredit':
+    get:
+      summary: get current confirmed credit for wallet
+      operationId: getConfirmedCredit
+      security:
+        - Vault_Auth:
+            - 'read:credit'
       parameters:
         - name: walletId
           description: the wallets ID
@@ -118,9 +146,9 @@ paths:
     get:
       summary: get txs with utxo for wallet
       operationId: getTransactions
-      security: 
+      security:
         - Vault_Auth:
-          - read:credit
+            - 'read:credit'
       parameters:
         - name: walletId
           description: the wallets ID
@@ -148,9 +176,9 @@ paths:
     get:
       summary: returns payout IDs
       operationId: getPayoutsForWalletId
-      security: 
+      security:
         - Vault_Auth:
-          - read:payouts
+            - 'read:payouts'
       parameters:
         - name: walletId
           description: the wallets ID
@@ -186,9 +214,9 @@ paths:
     post:
       summary: set PayoutAddress and iniate Payout
       operationId: createPayoutForWallet
-      security: 
+      security:
         - Vault_Auth:
-          - create:payout
+            - 'create:payout'
       parameters:
         - name: walletId
           description: the wallets ID
@@ -228,27 +256,27 @@ paths:
     get:
       summary: Get payout
       operationId: getPayout
-      security: 
+      security:
         - Vault_Auth:
-          - read:payouts
+            - 'read:payouts'
       parameters:
-      - name: walletId
-        description: the wallets ID
-        in: path
-        type: string
-        format: uuid
-        required: true
-      - name: payoutId
-        description: the payout ID
-        in: path
-        type: string
-        format: uuid
-        required: true
-      - name: accessToken
-        description: oauth2 accessToken
-        in: query
-        required: true
-        type: string
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+        - name: payoutId
+          description: the payout ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '200':
           description: payout object
@@ -262,32 +290,31 @@ paths:
           description: no wallet with this id
           schema:
             $ref: '#/definitions/Error'
-  
   '/wallets/{walletId}/payouts/{payoutId}/transactions':
     get:
       summary: Get payout transaction(s)
       operationId: getPayoutTransactions
-      security: 
+      security:
         - Vault_Auth:
-          - read:payouts
+            - 'read:payouts'
       parameters:
-      - name: walletId
-        description: the wallets ID
-        in: path
-        type: string
-        format: uuid
-        required: true
-      - name: payoutId
-        description: the payout ID
-        in: path
-        type: string
-        format: uuid
-        required: true
-      - name: accessToken
-        description: oauth2 accessToken
-        in: query
-        required: true
-        type: string
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+        - name: payoutId
+          description: the payout ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
       responses:
         '200':
           description: list of transactions
@@ -303,14 +330,13 @@ paths:
           description: no wallet with this id
           schema:
             $ref: '#/definitions/Error'
-  
   '/wallets/{walletId}/newaddress':
     get:
       summary: get new receive address
       operationId: getNewAddress
-      security: 
+      security:
         - Vault_Auth:
-          - get:address
+            - 'get:address'
       parameters:
         - name: walletId
           description: the wallets ID
@@ -336,9 +362,9 @@ paths:
     get:
       summary: get the Public Seed of the keychain
       operationId: getPublicSeed
-      security: 
+      security:
         - Vault_Auth:
-          - read:publicseed
+            - 'read:publicseed'
       parameters:
         - name: walletId
           description: the wallets ID
@@ -360,23 +386,21 @@ paths:
           description: no wallet with this id
           schema:
             $ref: '#/definitions/Error'
-
 securityDefinitions:
   Vault_Auth:
     type: oauth2
     flow: accessCode
-    authorizationUrl: http://none
-    tokenUrl: http://none
+    authorizationUrl: 'http://none'
+    tokenUrl: 'http://none'
     scopes:
-      create:wallet: Create a Wallet
-      read:wallet: Read Wallet information
-      delete:wallet: Delete a Wallet
-      read:credit: readout the credit for wallet
-      read:publicseed: get the publicseed for wallet
-      get:address: get a fresh address for a wallet
-      create:payout: create payout
-      read:payouts: get Payout information
-
+      'create:wallet': Create a Wallet
+      'read:wallet': Read Wallet information
+      'delete:wallet': Delete a Wallet
+      'read:credit': readout the credit for wallet
+      'read:publicseed': get the publicseed for wallet
+      'get:address': get a fresh address for a wallet
+      'create:payout': create payout
+      'read:payouts': get Payout information
 definitions:
   Payout:
     description: object describing a payout job
@@ -392,18 +416,18 @@ definitions:
         format: int32
       emptyWallet:
         type: boolean
-        description: if true, the amount value will be the maximum value paid out. but it will also payout if there is less balance in the wallet
+        description: >-
+          if true, the amount value will be the maximum value paid out. but it
+          will also payout if there is less balance in the wallet
       referenceId:
         type: string
         description: a place to put describing information
-
   UserId:
     description: an object with the userid inside
     type: object
     properties:
       userId:
         type: string
-
   Transaction:
     description: incoming or outgoing tx fullfilling an invoice
     type: object

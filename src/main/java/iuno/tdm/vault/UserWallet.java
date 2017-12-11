@@ -28,6 +28,8 @@ public class UserWallet {
     private static final Logger logger = LoggerFactory.getLogger(UserWallet.class);
     private File walletFile;
     private HashMap<UUID,Payout>payouts = new HashMap<>();
+
+
     private PeerGroup peerGroup;
 
     public UserWallet(String userId, Context context, PeerGroup peerGroup) throws IOException {
@@ -49,7 +51,8 @@ public class UserWallet {
     }
 
 
-    public UserWallet(String walletId, String userId, Context context, String walletFileName) throws IOException, UnreadableWalletException {
+    public UserWallet(String walletId, String userId, Context context, String walletFileName, PeerGroup peerGroup) throws IOException, UnreadableWalletException {
+        this.peerGroup = peerGroup;
         id = UUID.fromString(walletId);
         this.userId = userId;
         this.context = context;
@@ -84,7 +87,10 @@ public class UserWallet {
     }
 
     public Coin getBalance(){
-        return wallet.getBalance();
+        return wallet.getBalance(Wallet.BalanceType.ESTIMATED);
+    }
+    public Coin getConfirmedBalance(){
+        return wallet.getBalance(Wallet.BalanceType.AVAILABLE);
     }
 
     public Wallet getWallet(){

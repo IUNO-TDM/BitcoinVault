@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
  * object describing a payout job
  */
 @ApiModel(description = "object describing a payout job")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-07T14:48:59.249Z")
 public class Payout   {
   @JsonProperty("payoutId")
   private UUID payoutId = null;
@@ -47,10 +47,10 @@ public class Payout   {
     return this;
   }
 
-   /**
+  /**
    * Get payoutId
    * @return payoutId
-  **/
+   **/
   @JsonProperty("payoutId")
   @ApiModelProperty(value = "")
   public UUID getPayoutId() {
@@ -66,10 +66,10 @@ public class Payout   {
     return this;
   }
 
-   /**
+  /**
    * Get payoutAddress
    * @return payoutAddress
-  **/
+   **/
   @JsonProperty("payoutAddress")
   @ApiModelProperty(value = "")
   public String getPayoutAddress() {
@@ -85,10 +85,10 @@ public class Payout   {
     return this;
   }
 
-   /**
+  /**
    * Get amount
    * @return amount
-  **/
+   **/
   @JsonProperty("amount")
   @ApiModelProperty(value = "")
   public Integer getAmount() {
@@ -104,10 +104,10 @@ public class Payout   {
     return this;
   }
 
-   /**
+  /**
    * if true, the amount value will be the maximum value paid out. but it will also payout if there is less balance in the wallet
    * @return emptyWallet
-  **/
+   **/
   @JsonProperty("emptyWallet")
   @ApiModelProperty(value = "if true, the amount value will be the maximum value paid out. but it will also payout if there is less balance in the wallet")
   public Boolean getEmptyWallet() {
@@ -123,10 +123,10 @@ public class Payout   {
     return this;
   }
 
-   /**
+  /**
    * a place to put describing information
    * @return referenceId
-  **/
+   **/
   @JsonProperty("referenceId")
   @ApiModelProperty(value = "a place to put describing information")
   public String getReferenceId() {
