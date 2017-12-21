@@ -23,27 +23,29 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
+
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
 public class WalletsApiServiceImpl extends WalletsApiService {
     private static final OAuthValidator VALIDATOR = new OAuthValidator("oauthHost");
     private static final Logger logger = LoggerFactory.getLogger(WalletsApiServiceImpl.class);
+
     @Override
-    public Response addWallet( @NotNull String accessToken, UserId userId, SecurityContext securityContext) throws NotFoundException {
+    public Response addWallet(@NotNull String accessToken, UserId userId, SecurityContext securityContext) throws NotFoundException {
 
         Response resp;
         Error err = new Error();
         err.setMessage("success");
         UUID walletId = null;
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             AccessRule accessRule = new AccessRule(null, new Scope[]{Scope.simple("write:wallet")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
+            } else {
                 try {
                     walletId = Vault.getInstance().createWallet(userId.getUserId());
 
@@ -60,31 +62,34 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
 
     @Override
-    public Response createPayoutForWallet(UUID walletId, Payout payout,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response createPayoutForWallet(UUID walletId, Payout payout, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
 
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.parameter("create:payout",
                                     new String[]{payout.getPayoutAddress(), payout.getAmount().toString()})});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
+            } else {
                 try {
                     payout = Vault.getInstance().addPayoutForWallet(payout, walletId);
                     resp = Response.status(201).entity(walletId.toString()).entity(payout).build();
                     logger.info(String.format("Created new payout %s", payout.getPayoutId()));
+                } catch (IllegalArgumentException e) {
+                    err.setMessage(e.getMessage());
+                    resp = Response.status(409).entity(err).build();
                 } catch (Exception e) {
                     err.setMessage(e.getMessage());
                     resp = Response.status(500).entity(err).build();
@@ -97,31 +102,32 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
         return resp;
     }
+
     @Override
-    public Response deleteWallet(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response deleteWallet(UUID walletId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
                             new String[]{userId, "admin"}, //TODO Check if admin is necessary
                             new Scope[]{Scope.simple("delete:wallet")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
-                try{
+            } else {
+                try {
                     Vault.getInstance().deleteWallet(walletId);
                     resp = Response.status(200).entity("wallet deleted").type(MediaType.TEXT_PLAIN_TYPE).build();
                     logger.info(String.format("Deleted wallet %s", walletId));
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     err.setMessage("no wallet found for id " + walletId);
                     resp = Response.status(404).entity(err).build();
                 }
@@ -133,31 +139,31 @@ public class WalletsApiServiceImpl extends WalletsApiService {
     }
 
     @Override
-    public Response getConfirmedCredit(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getConfirmedCredit(UUID walletId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("read:credit")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
+            } else {
 
-                try{
+                try {
                     long credit = Vault.getInstance().getConfirmedCredit(walletId);
-                    resp = Response.status(200).entity(String.format("%d",credit)).type(MediaType.TEXT_PLAIN_TYPE).build();
+                    resp = Response.status(200).entity(String.format("%d", credit)).type(MediaType.TEXT_PLAIN_TYPE).build();
                     logger.info(String.format("Got confirmed credit wallet %s:%d", walletId, credit));
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     err.setMessage("no wallet found for id " + walletId);
                     resp = Response.status(404).entity(err).build();
                 }
@@ -170,31 +176,31 @@ public class WalletsApiServiceImpl extends WalletsApiService {
     }
 
     @Override
-    public Response getCredit(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getCredit(UUID walletId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("read:credit")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
+            } else {
 
-                try{
+                try {
                     long credit = Vault.getInstance().getCredit(walletId);
-                    resp = Response.status(200).entity(String.format("%d",credit)).type(MediaType.TEXT_PLAIN_TYPE).build();
+                    resp = Response.status(200).entity(String.format("%d", credit)).type(MediaType.TEXT_PLAIN_TYPE).build();
                     logger.info(String.format("Got credit wallet %s:%d", walletId, credit));
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     err.setMessage("no wallet found for id " + walletId);
                     resp = Response.status(404).entity(err).build();
                 }
@@ -205,33 +211,33 @@ public class WalletsApiServiceImpl extends WalletsApiService {
         return resp;
 
     }
-    
+
     @Override
-    public Response getNewAddress(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getNewAddress(UUID walletId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("get:address")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
+            } else {
 
-                try{
+                try {
                     String address = Vault.getInstance().getFreshAddress(walletId);
                     resp = Response.status(200).entity(address).type(MediaType.TEXT_PLAIN_TYPE).build();
                     logger.info(String.format("Fresh receive address for wallet %s: %s", walletId, address));
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     err.setMessage("no wallet found for id " + walletId);
                     resp = Response.status(404).entity(err).build();
                 }
@@ -241,27 +247,28 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
         return resp;
     }
+
     @Override
-    public Response getPayout(UUID walletId, UUID payoutId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getPayout(UUID walletId, UUID payoutId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("read:payouts")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
-                Payout payout = Vault.getInstance().getPayoutForIdAndWallet(payoutId,walletId);
+            } else {
+                Payout payout = Vault.getInstance().getPayoutForIdAndWallet(payoutId, walletId);
                 resp = Response.status(201).entity(walletId.toString()).entity(payout).build();
             }
 
@@ -269,27 +276,28 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
         return resp;
     }
+
     @Override
-    public Response getPayoutTransactions(UUID walletId, UUID payoutId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getPayoutTransactions(UUID walletId, UUID payoutId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("read:payouts")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
-                Transaction[] transactions = Vault.getInstance().getTransactionsForPayoutAndWallet(payoutId,walletId);
+            } else {
+                Transaction[] transactions = Vault.getInstance().getTransactionsForPayoutAndWallet(payoutId, walletId);
                 resp = Response.status(201).entity(walletId.toString()).entity(transactions).build();
             }
 
@@ -297,26 +305,27 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
         return resp;
     }
+
     @Override
-    public Response getPayoutsForWalletId(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getPayoutsForWalletId(UUID walletId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("read:payouts")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
+            } else {
                 UUID[] payouts = Vault.getInstance().getPayoutIdsForWallet(walletId);
                 resp = Response.status(201).entity(walletId.toString()).entity(payouts).build();
             }
@@ -325,31 +334,32 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
         return resp;
     }
+
     @Override
-    public Response getPublicSeed(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getPublicSeed(UUID walletId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("read:publicseed")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
-                try{
+            } else {
+                try {
                     String seed = Vault.getInstance().getPublicSeed(walletId);
                     resp = Response.status(200).entity(seed).type(MediaType.TEXT_PLAIN_TYPE).build();
                     logger.info(String.format("Public seed for wallet %s: %s", walletId, seed));
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     err.setMessage("no wallet found for id " + walletId);
                     resp = Response.status(404).entity(err).build();
                 }
@@ -358,31 +368,32 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
         return resp;
     }
+
     @Override
-    public Response getTransactions(UUID walletId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getTransactions(UUID walletId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             String userId = Vault.getInstance().getUserIdForWalletId(walletId);
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("read:credit")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
-                try{
+            } else {
+                try {
                     Transaction[] transactions = Vault.getInstance().getTransactions(walletId);
                     resp = Response.status(200).entity(transactions).build();
 //            logger.info(String.format("Public seed for wallet %s: %s", walletId, transactions));
-                }catch (NullPointerException e){
+                } catch (NullPointerException e) {
                     err.setMessage("no wallet found for id " + walletId);
                     resp = Response.status(404).entity(err).build();
                 }
@@ -391,28 +402,29 @@ public class WalletsApiServiceImpl extends WalletsApiService {
 
         return resp;
     }
+
     @Override
-    public Response getWalletId( @NotNull String userId,  @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+    public Response getWalletId(@NotNull String userId, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
         Response resp;
         Error err = new Error();
         err.setMessage("success");
 
         OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
-        if(!validation.valid){
+        if (!validation.valid) {
             err.setMessage("Validation of AccessToken not successful");
             resp = Response.status(403).entity(err).build();
-        }else{
+        } else {
             AccessRule accessRule =
                     new AccessRule(
-                            new String[]{userId,"admin"},
+                            new String[]{userId, "admin"},
                             new Scope[]{Scope.simple("read:wallet")});
-            if(!accessRule.applyValidation(validation)){
+            if (!accessRule.applyValidation(validation)) {
                 err.setMessage("Wrong scope or user");
                 resp = Response.status(403).entity(err).build();
-            }else{
+            } else {
                 UUID[] ids = Vault.getInstance().getWalletIds(userId);
                 String[] stringIds = new String[ids.length];
-                for(int i = 0; i<ids.length; i++ ){
+                for (int i = 0; i < ids.length; i++) {
                     stringIds[i] = ids[i].toString();
                 }
                 resp = Response.status(200).entity(ids).build();
