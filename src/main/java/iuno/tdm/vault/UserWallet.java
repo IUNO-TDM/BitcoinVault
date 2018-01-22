@@ -118,7 +118,7 @@ public class UserWallet {
 
 
         SendRequest sendRequest;
-        if(wallet.getBalance().equals(Coin.ZERO)){
+        if(wallet.getBalance(Wallet.BalanceType.ESTIMATED).equals(Coin.ZERO)){
             throw new IllegalArgumentException("Wallet is empty");
         }else{
             if(payout.getEmptyWallet()){
@@ -128,20 +128,21 @@ public class UserWallet {
                     sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(),payout.getPayoutAddress()));
                 }
             }else{
-                if(wallet.getBalance().isLessThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))){
-                    throw new IllegalArgumentException("Wallet balance is to low for amount plus fee");
-                }else{
+//                if(wallet.getBalance(Wallet.BalanceType.ESTIMATED).isLessThan(preSendRequest.tx.get)){
+//                    throw new IllegalArgumentException("Wallet balance is to low for amount plus fee");
+//                }else{
                     sendRequest = preSendRequest;
-                }
+
             }
         }
+        logger.debug(sendRequest.tx.getFee().toString());
 
         try {
             wallet.completeTx(sendRequest);
             wallet.commitTx(sendRequest.tx);
             peerGroup.broadcastTransaction(sendRequest.tx).broadcast();
         } catch (InsufficientMoneyException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException(e.getMessage());
         }
         payouts.put(payout.getPayoutId(),payout);
 
