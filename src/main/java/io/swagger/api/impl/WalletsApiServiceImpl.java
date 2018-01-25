@@ -2,16 +2,14 @@ package io.swagger.api.impl;
 
 import io.swagger.api.*;
 
-import io.swagger.model.Error;
-import io.swagger.model.Payout;
-import io.swagger.model.Transaction;
+import io.swagger.model.*;
 
 import java.io.IOException;
 import java.util.UUID;
 
 import io.swagger.api.NotFoundException;
 
-import io.swagger.model.UserId;
+import io.swagger.model.Error;
 import iuno.tdm.vault.AccessRule;
 import iuno.tdm.vault.OAuthValidator;
 import iuno.tdm.vault.Scope;
@@ -24,7 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-07-13T12:01:01.236Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-24T14:05:55.521Z")
 public class WalletsApiServiceImpl extends WalletsApiService {
     private static final OAuthValidator VALIDATOR = new OAuthValidator("oauthHost");
     private static final Logger logger = LoggerFactory.getLogger(WalletsApiServiceImpl.class);
@@ -85,7 +83,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
             } else {
                 try {
                     payout = Vault.getInstance().addPayoutForWallet(payout, walletId);
-                    resp = Response.status(201).entity(walletId.toString()).entity(payout).build();
+                    resp = Response.status(201).entity(payout).build();
                     logger.info(String.format("Created new payout %s", payout.getPayoutId()));
                 } catch (IllegalArgumentException e) {
                     err.setMessage(e.getMessage());
@@ -430,6 +428,47 @@ public class WalletsApiServiceImpl extends WalletsApiService {
                 resp = Response.status(200).entity(ids).build();
             }
         }
+        return resp;
+    }
+
+    @Override
+    public Response checkPayoutForWallet(UUID walletId, Payout payout, @NotNull String accessToken, SecurityContext securityContext) throws NotFoundException {
+        Response resp;
+        Error err = new Error();
+        err.setMessage("success");
+
+        OAuthValidator.Validation validation = VALIDATOR.validateToken(accessToken);
+        if (!validation.valid) {
+            err.setMessage("Validation of AccessToken not successful");
+            resp = Response.status(403).entity(err).build();
+        } else {
+            String userId = Vault.getInstance().getUserIdForWalletId(walletId);
+            AccessRule accessRule =
+                    new AccessRule(
+                            new String[]{userId, "admin"},
+                            new Scope[]{Scope.parameter("create:payout",
+                                    new String[]{payout.getPayoutAddress(), payout.getAmount().toString()})});
+            if (!accessRule.applyValidation(validation)) {
+                err.setMessage("Wrong scope or user");
+                resp = Response.status(403).entity(err).build();
+            } else {
+                try {
+                    PayoutCheck payoutCheck = Vault.getInstance().checkPayoutForWallet(payout, walletId);
+
+                    if(payoutCheck.getRemaining() < 0){
+                        resp = Response.status(409).entity(payoutCheck).build();
+                    }else{
+                        resp = Response.status(201).entity(payoutCheck).build();
+                    }
+
+                    logger.info(String.format("Created new payout %s", payout.getPayoutId()));
+                } catch (Exception e) {
+                    err.setMessage(e.getMessage());
+                    resp = Response.status(500).entity(err).build();
+                }
+            }
+        }
+
         return resp;
     }
 }

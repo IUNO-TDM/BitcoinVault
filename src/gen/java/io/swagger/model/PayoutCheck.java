@@ -21,31 +21,52 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * an object with the userid inside
+ * PayoutCheck
  */
-@ApiModel(description = "an object with the userid inside")
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-25T09:55:46.951Z")
-public class UserId   {
-  @JsonProperty("userId")
-  private String userId = null;
+public class PayoutCheck   {
+  @JsonProperty("fee")
+  private Integer fee = null;
 
-  public UserId userId(String userId) {
-    this.userId = userId;
+  @JsonProperty("remaining")
+  private Integer remaining = null;
+
+  public PayoutCheck fee(Integer fee) {
+    this.fee = fee;
     return this;
   }
 
   /**
-   * Get userId
-   * @return userId
+   * Get fee
+   * @return fee
    **/
-  @JsonProperty("userId")
+  @JsonProperty("fee")
   @ApiModelProperty(value = "")
-  public String getUserId() {
-    return userId;
+  public Integer getFee() {
+    return fee;
   }
 
-  public void setUserId(String userId) {
-    this.userId = userId;
+  public void setFee(Integer fee) {
+    this.fee = fee;
+  }
+
+  public PayoutCheck remaining(Integer remaining) {
+    this.remaining = remaining;
+    return this;
+  }
+
+  /**
+   * Get remaining
+   * @return remaining
+   **/
+  @JsonProperty("remaining")
+  @ApiModelProperty(value = "")
+  public Integer getRemaining() {
+    return remaining;
+  }
+
+  public void setRemaining(Integer remaining) {
+    this.remaining = remaining;
   }
 
 
@@ -57,22 +78,24 @@ public class UserId   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    UserId userId = (UserId) o;
-    return Objects.equals(this.userId, userId.userId);
+    PayoutCheck payoutCheck = (PayoutCheck) o;
+    return Objects.equals(this.fee, payoutCheck.fee) &&
+        Objects.equals(this.remaining, payoutCheck.remaining);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(userId);
+    return Objects.hash(fee, remaining);
   }
 
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class UserId {\n");
+    sb.append("class PayoutCheck {\n");
     
-    sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
+    sb.append("    fee: ").append(toIndentedString(fee)).append("\n");
+    sb.append("    remaining: ").append(toIndentedString(remaining)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -252,6 +252,52 @@ paths:
           description: no wallet with this id
           schema:
             $ref: '#/definitions/Error'
+        '409':
+          description: not enough money to commit this payout
+          schema:
+            $ref: '#/definitions/Error'
+  '/wallets/{walletId}/payouts/check':
+    post:
+      summary: test a payout and get information
+      operationId: checkPayoutForWallet
+      security:
+        - Vault_Auth:
+            - 'create:payout'
+      parameters:
+        - name: walletId
+          description: the wallets ID
+          in: path
+          type: string
+          format: uuid
+          required: true
+        - name: payout
+          description: the payoutAddress
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Payout'
+        - name: accessToken
+          description: oauth2 accessToken
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: payout would be succesful
+          schema:
+            $ref: '#/definitions/PayoutCheck'
+        '403':
+          description: wrong authCode or not authorized
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: no wallet with this id
+          schema:
+            $ref: '#/definitions/Error'
+        '409':
+          description: not enough money to commit this payout
+          schema:
+            $ref: '#/definitions/Payout'
   '/wallets/{walletId}/payouts/{payoutId}':
     get:
       summary: Get payout
@@ -422,6 +468,15 @@ definitions:
       referenceId:
         type: string
         description: a place to put describing information
+  PayoutCheck:
+    type: object
+    properties:
+      fee:
+        type: integer
+        format: long
+      remaining:
+        type: integer
+        format: long
   UserId:
     description: an object with the userid inside
     type: object

@@ -9,6 +9,7 @@ import io.swagger.jaxrs.*;
 
 import io.swagger.model.Error;
 import io.swagger.model.Payout;
+import io.swagger.model.PayoutCheck;
 import io.swagger.model.Transaction;
 import java.util.UUID;
 import io.swagger.model.UserId;
@@ -32,7 +33,7 @@ import javax.validation.constraints.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json", "text/plain" })
 @io.swagger.annotations.Api(description = "the wallets API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-07T14:48:59.249Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-25T09:55:46.951Z")
 public class WalletsApi  {
    private final WalletsApiService delegate;
 
@@ -75,6 +76,30 @@ public class WalletsApi  {
         return delegate.addWallet(accessToken,userId,securityContext);
     }
     @POST
+    @Path("/{walletId}/payouts/check")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json", "text/plain" })
+    @io.swagger.annotations.ApiOperation(value = "test a payout and get information", notes = "", response = PayoutCheck.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "Vault_Auth", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "create:payout", description = "create payout")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "payout would be succesful", response = PayoutCheck.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 403, message = "wrong authCode or not authorized", response = PayoutCheck.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = PayoutCheck.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 409, message = "not enough money to commit this payout", response = PayoutCheck.class) })
+    public Response checkPayoutForWallet(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
+,@ApiParam(value = "the payoutAddress" ,required=true) Payout payout
+,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken
+,@Context SecurityContext securityContext)
+    throws NotFoundException {
+        return delegate.checkPayoutForWallet(walletId,payout,accessToken,securityContext);
+    }
+    @POST
     @Path("/{walletId}/payouts")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "text/plain" })
@@ -88,7 +113,9 @@ public class WalletsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 403, message = "wrong authCode or not authorized", response = Payout.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Payout.class) })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "no wallet with this id", response = Payout.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 409, message = "not enough money to commit this payout", response = Payout.class) })
     public Response createPayoutForWallet(@ApiParam(value = "the wallets ID",required=true) @PathParam("walletId") UUID walletId
 ,@ApiParam(value = "the payoutAddress" ,required=true) Payout payout
 ,@ApiParam(value = "oauth2 accessToken",required=true) @QueryParam("accessToken") String accessToken

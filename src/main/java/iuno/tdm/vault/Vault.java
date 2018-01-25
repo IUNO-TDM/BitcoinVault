@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import io.swagger.model.Payout;
+import io.swagger.model.PayoutCheck;
 import io.swagger.model.Transaction;
 import org.bitcoinj.core.*;
 import org.bitcoinj.core.listeners.DownloadProgressTracker;
@@ -233,6 +234,13 @@ public class Vault {
             throw new NullPointerException("no wallet with id " + walletId.toString());
         }
         return userWallets.get(walletId).getPayout(payoutId);
+    }
+
+    public PayoutCheck checkPayoutForWallet( Payout payout, UUID walletId){
+        if(!userWallets.containsKey(walletId)){
+            throw new NullPointerException("no wallet with id " + walletId.toString());
+        }
+        return userWallets.get(walletId).checkPayout(payout);
     }
 
     public UUID[] getPayoutIdsForWallet(UUID walletId){

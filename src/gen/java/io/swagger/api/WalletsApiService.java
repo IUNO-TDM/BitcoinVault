@@ -7,6 +7,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import io.swagger.model.Error;
 import io.swagger.model.Payout;
+import io.swagger.model.PayoutCheck;
 import io.swagger.model.Transaction;
 import java.util.UUID;
 import io.swagger.model.UserId;
@@ -19,9 +20,10 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.validation.constraints.*;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2017-12-07T14:48:59.249Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaJerseyServerCodegen", date = "2018-01-25T09:55:46.951Z")
 public abstract class WalletsApiService {
     public abstract Response addWallet( @NotNull String accessToken,UserId userId,SecurityContext securityContext) throws NotFoundException;
+    public abstract Response checkPayoutForWallet(UUID walletId,Payout payout, @NotNull String accessToken,SecurityContext securityContext) throws NotFoundException;
     public abstract Response createPayoutForWallet(UUID walletId,Payout payout, @NotNull String accessToken,SecurityContext securityContext) throws NotFoundException;
     public abstract Response deleteWallet(UUID walletId, @NotNull String accessToken,SecurityContext securityContext) throws NotFoundException;
     public abstract Response getConfirmedCredit(UUID walletId, @NotNull String accessToken,SecurityContext securityContext) throws NotFoundException;
