@@ -455,11 +455,7 @@ public class WalletsApiServiceImpl extends WalletsApiService {
                 try {
                     PayoutCheck payoutCheck = Vault.getInstance().checkPayoutForWallet(payout, walletId);
 
-                    if(payoutCheck.getRemaining() < 0){
-                        resp = Response.status(409).entity(payoutCheck).build();
-                    }else{
-                        resp = Response.status(201).entity(payoutCheck).build();
-                    }
+                    resp = Response.status(200).entity(payoutCheck).build();
 
                     logger.info(String.format("Created new payout %s", payout.getPayoutId()));
                 } catch (Exception e) {
