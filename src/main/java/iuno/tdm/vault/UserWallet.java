@@ -119,7 +119,7 @@ public class UserWallet {
 
 
         SendRequest sendRequest;
-        if (wallet.getBalance(Wallet.BalanceType.ESTIMATED).equals(Coin.ZERO)) {
+        if (wallet.getBalance().equals(Coin.ZERO)) {
             throw new IllegalArgumentException("Wallet is empty");
         } else {
             if (payout.getEmptyWallet()) {
@@ -168,7 +168,7 @@ public class UserWallet {
         SendRequest preSendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
                 Coin.valueOf(payout.getAmount()));
         SendRequest sendRequest;
-        if (wallet.getBalance(Wallet.BalanceType.ESTIMATED).equals(Coin.ZERO)) {
+        if (wallet.getBalance().equals(Coin.ZERO)) {
             throw new IllegalArgumentException("Wallet is empty");
         } else {
             if (payout.getEmptyWallet()) {
@@ -186,17 +186,12 @@ public class UserWallet {
         Coin fee = Coin.ZERO;
         try {
             wallet.completeTx(sendRequest);
-            remaining = wallet.getBalance(Wallet.BalanceType.ESTIMATED).subtract(sendRequest.tx.getValueSentFromMe(wallet).subtract(sendRequest.tx.getValueSentToMe(wallet)));
+            remaining = wallet.getBalance().subtract(sendRequest.tx.getValueSentFromMe(wallet).subtract(sendRequest.tx.getValueSentToMe(wallet)));
             fee = sendRequest.tx.getFee();
         } catch (InsufficientMoneyException e) {
-            sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
-            try {
-                wallet.completeTx(sendRequest);
-                fee = sendRequest.tx.getFee();
-                remaining = wallet.getBalance(Wallet.BalanceType.ESTIMATED).subtract(Coin.valueOf(payout.getAmount())).subtract(fee);
-            } catch (InsufficientMoneyException e1) {
-                e1.printStackTrace();
-            }
+            remaining = e.missing.multiply(-1);
+            fee = wallet.getBalance().add(e.missing).subtract(Coin.valueOf(payout.getAmount()));
+
         }
 
         PayoutCheck pc = new PayoutCheck()
