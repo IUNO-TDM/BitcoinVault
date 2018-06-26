@@ -112,21 +112,21 @@ public class UserWallet {
         return transactionOutputs.toArray(new TransactionOutput[transactionOutputs.size()]);
     }
 
-    private SendRequest getSendRequest(Payout payout, Coin balance) {
-        SendRequest preSendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
+    private SendRequest getSendRequestforPayout(Payout payout, Coin balance) {
+        SendRequest sendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
                 Coin.valueOf(payout.getAmount()));
-        SendRequest sendRequest;
-        if (wallet.getBalance().equals(Coin.ZERO)) {
+
+        if (wallet.getBalance().equals(Coin.ZERO)) { // TODO rather check against DUST LIMIT
             throw new IllegalArgumentException("Wallet is empty");
         } else {
             if (payout.getEmptyWallet()) {
-                if (balance.isGreaterThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))) {
-                    sendRequest = preSendRequest;
+                if (balance.isGreaterThan(Coin.valueOf(payout.getAmount()).add(sendRequest.feePerKb))) { // TODO feePerKb is not the fee for this transaction
+                    // do nothing
                 } else {
                     sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
                 }
             } else {
-                sendRequest = preSendRequest;
+                // do nothing
             }
         }
         return sendRequest;
@@ -134,7 +134,7 @@ public class UserWallet {
 
     public Payout addPayout(Payout payout) {
         payout.setPayoutId(UUID.randomUUID());
-        SendRequest sendRequest = getSendRequest(payout, wallet.getBalance());
+        SendRequest sendRequest = getSendRequestforPayout(payout, wallet.getBalance());
         logger.debug(sendRequest.tx.getFee().toString());
 
         try {
@@ -168,7 +168,7 @@ public class UserWallet {
 
     public PayoutCheck checkPayout(Payout payout) {
         payout.setPayoutId(UUID.randomUUID());
-        SendRequest sendRequest = getSendRequest(payout, wallet.getBalance(Wallet.BalanceType.ESTIMATED));
+        SendRequest sendRequest = getSendRequestforPayout(payout, wallet.getBalance(Wallet.BalanceType.ESTIMATED));
 
         Coin remaining = Coin.ZERO;
         Coin fee = Coin.ZERO;
