@@ -44,6 +44,7 @@ public class UserWallet {
         walletFile = new File(workDir, PREFIX + id + ".wallet");
         try {
             wallet.autosaveToFile(walletFile, 5, TimeUnit.SECONDS, null).saveNow();
+            // TODO this needs to be deactivated after peergroup is stopped and before server is shut down
         } catch (IOException e) {
             logger.error(String.format("creating wallet file failed: %s", e.getMessage()));
             throw new IOException(String.format("creating wallet file failed: %s", e.getMessage()));
@@ -179,16 +180,17 @@ public class UserWallet {
         payout.setPayoutId(UUID.randomUUID()); // Why?
         SendRequest sendRequest = getSendRequestForPayout(payout);
 
-        Coin remaining = Coin.ZERO;
-        Coin fee = Coin.ZERO;
+        Coin balance = wallet.getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE);
+        Coin amount = Coin.valueOf(payout.getAmount());
+        Coin remaining;
+        Coin fee;
         try {
             wallet.completeTx(sendRequest);
-            remaining = wallet.getBalance().subtract(sendRequest.tx.getValueSentFromMe(wallet).subtract(sendRequest.tx.getValueSentToMe(wallet)));
             fee = sendRequest.tx.getFee();
+            remaining = balance.subtract(amount).subtract(fee);
         } catch (InsufficientMoneyException e) {
-            remaining = e.missing.multiply(-1);
-            fee = wallet.getBalance().add(e.missing).subtract(Coin.valueOf(payout.getAmount()));
-
+            fee = sendRequest.tx.getFee();
+            remaining = Coin.ZERO.subtract(e.missing);
         }
 
         PayoutCheck pc = new PayoutCheck()
