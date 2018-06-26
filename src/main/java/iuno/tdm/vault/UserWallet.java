@@ -114,18 +114,18 @@ public class UserWallet {
     }
 
     private SendRequest getSendRequestforPayout(Payout payout, Coin balance) {
-        SendRequest sendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
-                Coin.valueOf(payout.getAmount()));
-
         // fail if wallet contains less than twice the dust value
         if (wallet.getBalance().isLessThan(DefaultRiskAnalysis.MIN_ANALYSIS_NONDUST_OUTPUT.multiply(2))) {
             throw new IllegalArgumentException("Wallet is empty"); // TODO This error is not about an illegal argument!
         }
 
+        SendRequest sendRequest;
         if (payout.getEmptyWallet()) {
             sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
+
         } else {
-            // do nothing
+            sendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
+                    Coin.valueOf(payout.getAmount()));
         }
 
         return sendRequest;
