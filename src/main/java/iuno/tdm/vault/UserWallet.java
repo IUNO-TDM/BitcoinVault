@@ -112,18 +112,15 @@ public class UserWallet {
         return transactionOutputs.toArray(new TransactionOutput[transactionOutputs.size()]);
     }
 
-    public Payout addPayout(Payout payout) {
-        payout.setPayoutId(UUID.randomUUID());
+    private SendRequest getSendRequest(Payout payout, Coin balance) {
         SendRequest preSendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
                 Coin.valueOf(payout.getAmount()));
-
-
         SendRequest sendRequest;
         if (wallet.getBalance().equals(Coin.ZERO)) {
             throw new IllegalArgumentException("Wallet is empty");
         } else {
             if (payout.getEmptyWallet()) {
-                if (wallet.getBalance().isGreaterThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))) {
+                if (balance.isGreaterThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))) {
                     sendRequest = preSendRequest;
                 } else {
                     sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
@@ -132,6 +129,12 @@ public class UserWallet {
                 sendRequest = preSendRequest;
             }
         }
+        return sendRequest;
+    }
+
+    public Payout addPayout(Payout payout) {
+        payout.setPayoutId(UUID.randomUUID());
+        SendRequest sendRequest = getSendRequest(payout, wallet.getBalance());
         logger.debug(sendRequest.tx.getFee().toString());
 
         try {
@@ -165,22 +168,7 @@ public class UserWallet {
 
     public PayoutCheck checkPayout(Payout payout) {
         payout.setPayoutId(UUID.randomUUID());
-        SendRequest preSendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
-                Coin.valueOf(payout.getAmount()));
-        SendRequest sendRequest;
-        if (wallet.getBalance().equals(Coin.ZERO)) {
-            throw new IllegalArgumentException("Wallet is empty");
-        } else {
-            if (payout.getEmptyWallet()) {
-                if (wallet.getBalance(Wallet.BalanceType.ESTIMATED).isGreaterThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))) {
-                    sendRequest = preSendRequest;
-                } else {
-                    sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
-                }
-            } else {
-                sendRequest = preSendRequest;
-            }
-        }
+        SendRequest sendRequest = getSendRequest(payout, wallet.getBalance(Wallet.BalanceType.ESTIMATED));
 
         Coin remaining = Coin.ZERO;
         Coin fee = Coin.ZERO;
