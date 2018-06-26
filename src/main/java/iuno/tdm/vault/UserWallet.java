@@ -2,6 +2,7 @@ package iuno.tdm.vault;
 
 import io.swagger.model.*;
 import org.bitcoinj.core.*;
+import org.bitcoinj.wallet.DefaultRiskAnalysis;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.UnreadableWalletException;
 import org.bitcoinj.wallet.Wallet;
@@ -116,19 +117,17 @@ public class UserWallet {
         SendRequest sendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
                 Coin.valueOf(payout.getAmount()));
 
-        if (wallet.getBalance().equals(Coin.ZERO)) { // TODO rather check against DUST LIMIT
-            throw new IllegalArgumentException("Wallet is empty");
-        } else {
-            if (payout.getEmptyWallet()) {
-                if (balance.isGreaterThan(Coin.valueOf(payout.getAmount()).add(sendRequest.feePerKb))) { // TODO feePerKb is not the fee for this transaction
-                    // do nothing
-                } else {
-                    sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
-                }
-            } else {
-                // do nothing
-            }
+        // fail if wallet contains less than twice the dust value
+        if (wallet.getBalance().isLessThan(DefaultRiskAnalysis.MIN_ANALYSIS_NONDUST_OUTPUT.multiply(2))) {
+            throw new IllegalArgumentException("Wallet is empty"); // TODO This error is not about an illegal argument!
         }
+
+        if (payout.getEmptyWallet()) {
+            sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
+        } else {
+            // do nothing
+        }
+
         return sendRequest;
     }
 
