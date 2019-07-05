@@ -195,6 +195,14 @@ public class Vault {
             return;
         }
         peerGroup = new PeerGroup(context, blockChain);
+
+        UserWallet[] uws = vaultPersistence.recoverWallets(context, peerGroup);
+        for (UserWallet userWallet:uws) {
+            userWallets.put(userWallet.getId(),userWallet);
+            blockChain.addWallet(userWallet.getWallet());
+            peerGroup.addWallet(userWallet.getWallet());
+        }
+
         peerGroup.addPeerDiscovery(new DnsDiscovery(context.getParams()));
 
         Futures.addCallback(peerGroup.startAsync(), new FutureCallback() {
@@ -207,19 +215,10 @@ public class Vault {
 
                     @Override
                     public void onFailure(Throwable throwable) {
-
+                        logger.error("failed to start peer group");
                     }
                 }
         );
-
-
-        UserWallet[] uws = vaultPersistence.recoverWallets(context, peerGroup);
-        for (UserWallet userWallet:uws) {
-            userWallets.put(userWallet.getId(),userWallet);
-            blockChain.addWallet(userWallet.getWallet());
-            peerGroup.addWallet(userWallet.getWallet());
-        }
-
     }
 
     public String getUserIdForWalletId(UUID walletId){
