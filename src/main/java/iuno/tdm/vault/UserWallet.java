@@ -2,6 +2,7 @@ package iuno.tdm.vault;
 
 import io.swagger.model.*;
 import org.bitcoinj.core.*;
+import org.bitcoinj.core.Transaction;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.UnreadableWalletException;
 import org.bitcoinj.wallet.Wallet;
@@ -43,6 +44,7 @@ public class UserWallet {
         walletFile = new File(workDir, PREFIX + id + ".wallet");
         try {
             wallet.autosaveToFile(walletFile, 5, TimeUnit.SECONDS, null).saveNow();
+            // TODO this needs to be deactivated after peergroup is stopped and before server is shut down
         } catch (IOException e) {
             logger.error(String.format("creating wallet file failed: %s", e.getMessage()));
             throw new IOException(String.format("creating wallet file failed: %s", e.getMessage()));
@@ -87,11 +89,11 @@ public class UserWallet {
     }
 
     public Coin getBalance() {
-        return wallet.getBalance(Wallet.BalanceType.ESTIMATED);
+        return wallet.getBalance(Wallet.BalanceType.ESTIMATED_SPENDABLE);
     }
 
     public Coin getConfirmedBalance() {
-        return wallet.getBalance(Wallet.BalanceType.AVAILABLE);
+        return wallet.getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE);
     }
 
     public Wallet getWallet() {
@@ -112,26 +114,37 @@ public class UserWallet {
         return transactionOutputs.toArray(new TransactionOutput[transactionOutputs.size()]);
     }
 
-    public Payout addPayout(Payout payout) {
-        payout.setPayoutId(UUID.randomUUID());
-        SendRequest preSendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
-                Coin.valueOf(payout.getAmount()));
+    private SendRequest getSendRequestForPayout(Payout payout) {
+        // fail if wallet contains less than twice the dust value
+        if (wallet.getBalance().isLessThan(Transaction.MIN_NONDUST_OUTPUT.multiply(2))) {
+            throw new IllegalArgumentException("Wallet contains less than twice the dust output."); // TODO This error is not about an illegal argument!
+        }
 
+        // helper variables to provide readable code
+        Coin amount = Coin.valueOf(payout.getAmount());
+        Coin balance = wallet.getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE);
+        Coin doubleDust = Transaction.MIN_NONDUST_OUTPUT.multiply(2);
+        Address address = Address.fromBase58(context.getParams(), payout.getPayoutAddress());
 
         SendRequest sendRequest;
-        if (wallet.getBalance().equals(Coin.ZERO)) {
-            throw new IllegalArgumentException("Wallet is empty");
+
+        // empty wallet if change output would be dust or emptyWallet is true
+        if (payout.getEmptyWallet() || amount.add(doubleDust).isGreaterThan(balance)) {
+            sendRequest = SendRequest.emptyWallet(address);
+
         } else {
-            if (payout.getEmptyWallet()) {
-                if (wallet.getBalance().isGreaterThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))) {
-                    sendRequest = preSendRequest;
-                } else {
-                    sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
-                }
-            } else {
-                sendRequest = preSendRequest;
-            }
+            sendRequest = SendRequest.to(address, amount);
         }
+
+        // finalize send request
+        sendRequest.feePerKb = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
+        sendRequest.memo = payout.getReferenceId();
+        return sendRequest;
+    }
+
+    public Payout addPayout(Payout payout) {
+        payout.setPayoutId(UUID.randomUUID());
+        SendRequest sendRequest = getSendRequestForPayout(payout);
         logger.debug(sendRequest.tx.getFee().toString());
 
         try {
@@ -164,34 +177,20 @@ public class UserWallet {
     }
 
     public PayoutCheck checkPayout(Payout payout) {
-        payout.setPayoutId(UUID.randomUUID());
-        SendRequest preSendRequest = SendRequest.to(Address.fromBase58(context.getParams(), payout.getPayoutAddress()),
-                Coin.valueOf(payout.getAmount()));
-        SendRequest sendRequest;
-        if (wallet.getBalance().equals(Coin.ZERO)) {
-            throw new IllegalArgumentException("Wallet is empty");
-        } else {
-            if (payout.getEmptyWallet()) {
-                if (wallet.getBalance(Wallet.BalanceType.ESTIMATED).isGreaterThan(Coin.valueOf(payout.getAmount()).add(preSendRequest.feePerKb))) {
-                    sendRequest = preSendRequest;
-                } else {
-                    sendRequest = SendRequest.emptyWallet(Address.fromBase58(context.getParams(), payout.getPayoutAddress()));
-                }
-            } else {
-                sendRequest = preSendRequest;
-            }
-        }
+        payout.setPayoutId(UUID.randomUUID()); // Why?
+        SendRequest sendRequest = getSendRequestForPayout(payout);
 
-        Coin remaining = Coin.ZERO;
-        Coin fee = Coin.ZERO;
+        Coin balance = wallet.getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE);
+        Coin amount = Coin.valueOf(payout.getAmount());
+        Coin remaining;
+        Coin fee;
         try {
             wallet.completeTx(sendRequest);
-            remaining = wallet.getBalance().subtract(sendRequest.tx.getValueSentFromMe(wallet).subtract(sendRequest.tx.getValueSentToMe(wallet)));
             fee = sendRequest.tx.getFee();
+            remaining = balance.subtract(amount).subtract(fee);
         } catch (InsufficientMoneyException e) {
-            remaining = e.missing.multiply(-1);
-            fee = wallet.getBalance().add(e.missing).subtract(Coin.valueOf(payout.getAmount()));
-
+            fee = sendRequest.tx.getFee();
+            remaining = Coin.ZERO.subtract(e.missing);
         }
 
         PayoutCheck pc = new PayoutCheck()

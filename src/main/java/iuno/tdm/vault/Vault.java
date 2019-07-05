@@ -187,6 +187,8 @@ public class Vault {
 
         File chainFile = new File(workDir, PREFIX + ".spvchain");
 
+        // if chainfile got lost, wallets need to be reset for blockchain rescan
+        boolean resetWallets = ! chainFile.exists();
 
         try {
             blockChain = new BlockChain(context, new SPVBlockStore(context.getParams(), chainFile));
@@ -194,9 +196,18 @@ public class Vault {
             e.printStackTrace();
             return;
         }
-        peerGroup = new PeerGroup(context, blockChain);
-        peerGroup.addPeerDiscovery(new DnsDiscovery(context.getParams()));
 
+        peerGroup = new PeerGroup(context, blockChain);
+
+        UserWallet[] uws = vaultPersistence.recoverWallets(context, peerGroup);
+        for (UserWallet userWallet:uws) {
+            if (resetWallets) userWallet.getWallet().reset();
+            userWallets.put(userWallet.getId(), userWallet);
+            blockChain.addWallet(userWallet.getWallet());
+            peerGroup.addWallet(userWallet.getWallet());
+        }
+
+        peerGroup.addPeerDiscovery(new DnsDiscovery(context.getParams()));
         Futures.addCallback(peerGroup.startAsync(), new FutureCallback() {
                     @Override
                     public void onSuccess(@Nullable Object o) {
@@ -207,19 +218,10 @@ public class Vault {
 
                     @Override
                     public void onFailure(Throwable throwable) {
-
+                        logger.error("failed to start peer group");
                     }
                 }
         );
-
-
-        UserWallet[] uws = vaultPersistence.recoverWallets(context, peerGroup);
-        for (UserWallet userWallet:uws) {
-            userWallets.put(userWallet.getId(),userWallet);
-            blockChain.addWallet(userWallet.getWallet());
-            peerGroup.addWallet(userWallet.getWallet());
-        }
-
     }
 
     public String getUserIdForWalletId(UUID walletId){

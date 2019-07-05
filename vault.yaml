@@ -463,8 +463,7 @@ definitions:
       emptyWallet:
         type: boolean
         description: >-
-          if true, the amount value will be the maximum value paid out. but it
-          will also payout if there is less balance in the wallet
+          if true, all funds of the wallet are paid to the payoutAddress without regard of the value in amount
       referenceId:
         type: string
         description: a place to put describing information
